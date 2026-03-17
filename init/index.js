@@ -3,7 +3,7 @@ const initdata = require('./data')
 
 const Listing = require('../models/listing')
 
-const Mongo_url = "mongodb://127.0.0.1:27017/wanderlust"
+const Mongo_url = "mongodb://127.0.0.1:27017/stayvio"
 
 main()
 .then(() => {
@@ -18,7 +18,7 @@ async function main() {
 
 const initDB = async () =>{
     await Listing.deleteMany({});
-    initdata.data = initdata.data.map((obj) => ({...obj , owner : "697501cb61f474804b2b1045"}))
+    initdata.data = initdata.data.map((obj) => ({...obj , owner : "69943031a66fcd4dcecd1145"}))
     await Listing.insertMany(initdata.data)
     console.log("Data initialized");
 }

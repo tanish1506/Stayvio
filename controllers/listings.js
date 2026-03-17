@@ -1,15 +1,57 @@
 const Listing = require("../models/listing")
+const User = require("../models/user")
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding'); 
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({accessToken : mapToken})
 
 module.exports.index = async (req,res)=>{
-    const allListings = await Listing.find({});
-    res.render("./listings/index.ejs",{allListings});
+    // Get category and search from query parameters
+    // Example: /listings?category=Mountains&search=cabin
+    const { category, search } = req.query;
+    
+    // Build filter object dynamically
+    let filter = {};
+    
+    // Add category filter if provided
+    if(category) {
+        filter.category = category;
+    }
+    
+    // Add search filter if provided
+    if(search) {
+        // $or means "match ANY of these conditions"
+        // $regex allows partial matching (like SQL LIKE)
+        // $options: 'i' makes it case-insensitive
+        filter.$or = [
+            { title: { $regex: search, $options: 'i' } },           // Search in title
+            { description: { $regex: search, $options: 'i' } },     // Search in description
+            { location: { $regex: search, $options: 'i' } },        // Search in location
+            { country: { $regex: search, $options: 'i' } }          // Search in country
+        ];
+    }
+    
+    // Find listings based on combined filters
+    const allListings = await Listing.find(filter);
+    
+    // Get user's wishlist if logged in
+    let userWishlist = [];
+    if(req.user) {
+        const user = await User.findById(req.user._id);
+        userWishlist = user.wishlist.map(id => id.toString());
+    }
+    
+    // Pass data to view
+    res.render("./listings/index.ejs", { 
+        allListings, 
+        selectedCategory: category || null,
+        searchQuery: search || '',
+        currUser: req.user,
+        userWishlist: userWishlist
+    });
 }
 
 module.exports.renderNewForm = (req,res)=>{
-    res.render("listings/new.ejs")
+    res.render("listings/new.ejs", { searchQuery: '' })
 }
 
 module.exports.showListings = async (req,res)=>{
@@ -19,7 +61,7 @@ module.exports.showListings = async (req,res)=>{
         req.flash("error","Listing you requested , does not exist!!")
         return res.redirect("/listings")
     }
-    res.render("./listings/show.ejs",{listing})
+    res.render("./listings/show.ejs",{listing, searchQuery: ''})
 }
 
 module.exports.createListings = async (req,res,next)=>{
@@ -55,7 +97,7 @@ module.exports.editListings = async (req,res)=>{
     
     //used cloduinary image transformation but if it didnt work added style tag for image size in edit.ejs
     const changedImgUrl = listing.image.url.replace("/upload","/upload/w_250,h_300,c_fill,q_auto,f_auto")
-    res.render("listings/edit.ejs",{listing , changedImgUrl });
+    res.render("listings/edit.ejs",{listing , changedImgUrl, searchQuery: '' });
 }
 
 module.exports.updateListings = async (req,res)=>{

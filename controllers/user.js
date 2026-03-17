@@ -2,7 +2,7 @@ const User = require("../models/user")
 
 
 module.exports.renderSignupForm = (req,res) => {
-    res.render("users/signup.ejs")
+    res.render("users/signup.ejs", { searchQuery: '' })
 }
 
 module.exports.signup = async (req,res) => {
@@ -11,12 +11,11 @@ module.exports.signup = async (req,res) => {
         let {username,email,password} = req.body;
         const newUser = new User({email,username});
         const registeredUser = await User.register(newUser,password);
-        console.log(registeredUser);
         req.login(registeredUser,(err)=>{
             if(err){
                 return next(err)
             }
-            req.flash("sucess", "Welcome to Wanderlust!!");
+            req.flash("sucess", "Welcome to Stayvio!!");
             res.redirect("/listings");
         })
         
@@ -28,11 +27,11 @@ module.exports.signup = async (req,res) => {
 }
 
 module.exports.renderLoginForm = (req,res)=>{
-    res.render("users/login.ejs")
+    res.render("users/login.ejs", { searchQuery: '' })
 }
 
 module.exports.login = async (req,res) => {
-     req.flash("sucess" ,"Welcome back to wanderlust!")
+     req.flash("sucess" ,"Welcome back to Stayvio!")
      let redirectUrl = res.locals.redirectUrl || "/listings";
      res.redirect(redirectUrl); 
 }

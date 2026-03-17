@@ -6,7 +6,7 @@ const express = require('express');
 const app = express()
 const mongoose = require('mongoose');
 const path = require("path")
-const Mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
+const Mongo_url = "mongodb://127.0.0.1:27017/stayvio";
 const methodOverride = require("method-override")
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError")
@@ -19,6 +19,8 @@ const User = require("./models/user.js")
 const listingRouter = require("./routes/listing.js")
 const reviewRouter = require("./routes/review.js")
 const userRouter = require("./routes/user.js");
+const wishlistRouter = require("./routes/wishlist.js");
+const bookingRouter = require("./routes/booking.js")
 
 app.engine("ejs", ejsMate);
 app.set("view engine","ejs");
@@ -71,6 +73,8 @@ app.use((req,res,next) => {
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews",reviewRouter);
 app.use("/", userRouter);
+app.use("/wishlist", wishlistRouter);
+app.use("/",bookingRouter);
 
 
 //Error handling through ExpressError

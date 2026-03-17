@@ -10,7 +10,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary : cloudinary,
     params : {
-        folder : 'wander-develop',
+        folder : 'stayvio-uploads',
         allowed_formats : ['png','jpg','jpeg'],//supports promises as well
     },
 })
