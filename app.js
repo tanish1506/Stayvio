@@ -21,11 +21,13 @@ const reviewRouter = require("./routes/review.js")
 const userRouter = require("./routes/user.js");
 const wishlistRouter = require("./routes/wishlist.js");
 const bookingRouter = require("./routes/booking.js")
+const paymentRouter = require("./routes/payment.js");
 
 app.engine("ejs", ejsMate);
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"))
 app.use(express.urlencoded({extended: true}))
+app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")))
 
@@ -75,6 +77,7 @@ app.use("/listings/:id/reviews",reviewRouter);
 app.use("/", userRouter);
 app.use("/wishlist", wishlistRouter);
 app.use("/",bookingRouter);
+app.use("/",paymentRouter);
 
 
 //Error handling through ExpressError
