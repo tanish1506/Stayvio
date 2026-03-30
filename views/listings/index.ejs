@@ -1,174 +1,586 @@
 <% layout("/layouts/boilerplate") -%>
-<style>
-    #filters{
-        /* margin-top: 1rem; */
-        display: flex;
-        flex-wrap: wrap;
-        
-        align-items: center;
-    }
-    .filter-link{
-        text-decoration: none;
-        color: inherit;
-    }
-    .filter{
-        text-align: center;
-        margin: 1rem;
-        opacity: 0.5;
-        transition: opacity 0.3s;
-    }
-    .filter:hover{
-        opacity: 1;
-        cursor: pointer;
-    }
-    .active-filter{
-        opacity: 1 !important;
-        border-bottom: 2px solid #fe424d;
-    }
-    .filter p {
-        font-size: 0.9rem;
-    }
-    .tax-info{
-        display: none;
-    }
-    .tax-toggle{
-        border: 1px solid black;
-        border-radius: 1rem;
-        padding: 1rem;
-        height: 3.5rem;
-        margin-left: 3rem;
-        display: flex;
-        align-items: center;
-    }
 
-</style>
-    
-    <!-- <form method="get" action="/listings/new">
-        <button>Create New Listing</button>
-    </form> -->
-<div id="filters">
-    <a href="/listings" class="filter-link">
-        <div class="filter <%= !selectedCategory ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-fire"></i></div>
-            <p>Trending</p>
-        </div>
-    </a>
-    <a href="/listings?category=Rooms" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Rooms' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-bed"></i></div>
-            <p>Rooms</p>
-        </div>
-    </a>
-    <a href="/listings?category=Mountains" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Mountains' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-mountain"></i></div>
-            <p>Mountains</p>
-        </div>
-    </a>
-    <a href="/listings?category=Iconic Cities" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Iconic Cities' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-mountain-city"></i></div>
-            <p>Iconic Cities</p>
-        </div>
-    </a>
-    <a href="/listings?category=Castles" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Castles' ? 'active-filter' : '' %>">
-            <div><i class="fa-brands fa-fort-awesome"></i></div>
-            <p>Castles</p>
-        </div>
-    </a>
-    <a href="/listings?category=Amazing Pools" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Amazing Pools' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-water-ladder"></i></div>
-            <p>Amazing Pools</p>
-        </div>
-    </a>
-    <a href="/listings?category=Camping" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Camping' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-tents"></i></div>
-            <p>Camping</p>
-        </div>
-    </a>
-    <a href="/listings?category=Farms" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Farms' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-cow"></i></div>
-            <p>Farms</p>
-        </div>
-    </a>
-    <a href="/listings?category=Arctic" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Arctic' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-snowman"></i></div>
-            <p>Arctic</p>
-        </div>
-    </a>
-    <a href="/listings?category=Domes" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Domes' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-landmark-dome"></i></div>
-            <p>Domes </p>
-        </div>
-    </a>
-    <a href="/listings?category=Boats" class="filter-link">
-        <div class="filter <%= selectedCategory === 'Boats' ? 'active-filter' : '' %>">
-            <div><i class="fa-solid fa-sailboat"></i></div>
-            <p>Boats</p>
-        </div>
-    </a>
-
-    <div class="tax-toggle">
-        <div class="form-check-reverse form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
-            <label class="form-check-label" for="switchCheckDefault">Display Total after taxes</label>
-        </div>
-    </div>
-</div>
-<div class="row row-cols-lg-3 mt-1 row-cols-md-2 row-cols-sm-1">
-
-    <% for(let listing of allListings){ %> 
-        <div class="col mb-4">
-            <div class="card show-card">
-                <a href="/listings/<%= listing._id %>" class="listing-link">
-                    <img src="<%=listing.image.url %>" class="card-img-top" style="height: 20rem;" alt="listing_image">
-                    <div class="card-img-overlay"></div>
-                </a>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <a href="/listings/<%= listing._id %>" class="listing-link" style="flex: 1;">
-                            <p class="card-text">
-                                <b><%= listing.title %></b><br>
-                                &#8377;<%= listing.price.toLocaleString("en-IN") %>/night
-                                <i class="tax-info">&nbsp; &nbsp;+18% GST</i>
-                            </p>
-                        </a>
-                        <% if(currUser) { %>
-                            <% 
-                            const isInWishlist = userWishlist.includes(listing._id.toString());
-                            const action = isInWishlist ? 'remove' : 'add';
-                            const heartIcon = isInWishlist ? 'fa-solid' : 'fa-regular';
-                            const method = isInWishlist ? 'DELETE' : 'POST';
-                            %>
-                            <form method="POST" action="/wishlist/<%= action %>/<%= listing._id %><%= isInWishlist ? '?_method=DELETE' : '' %>" class="wishlist-form-<%= listing._id %>" style="margin-left: 10px; position: relative; z-index: 10;">
-                                <button type="button" onclick="event.stopPropagation(); event.preventDefault(); this.closest('form').submit();" class="btn btn-link text-danger p-0" style="border: none; background: none; cursor: pointer; position: relative; z-index: 10;">
-                                    <i class="<%= heartIcon %> fa-heart" style="font-size: 1.5rem; pointer-events: none;"></i>
-                                </button>
-                            </form>
-                        <% } %>
-                    </div>
-                </div>
+  <!-- Search Bar Section -->
+  <div class="search-section">
+    <div class="container px-2">
+      <div class="search-box">
+        <form action="/listings" method="GET" class="search-form-row">
+          <div class="search-field search-destination">
+            <label>Destination</label>
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" name="search" placeholder="Where are you going? e.g. Goa, Manali"
+                value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" />
             </div>
+            <div class="search-suggestions">
+              <span>Suggestions:</span>
+              <a href="/listings?search=Goa">Goa</a>
+              <a href="/listings?search=Manali">Manali</a>
+              <a href="/listings?search=Jaipur">Jaipur</a>
+            </div>
+          </div>
+          <div class="search-divider"></div>
+          <div class="search-field search-guests">
+            <label>Guests</label>
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-user-group"></i>
+              <input type="number" name="guests" placeholder="2 guests" min="1" />
+            </div>
+          </div>
+          <button type="submit" class="search-submit-btn">
+            <i class="fa-solid fa-magnifying-glass me-1"></i>Search
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container px-2 py-3">
+    <div class="row g-4">
+
+      <!-- LEFT: Filters Sidebar -->
+      <div class="col-lg-2 col-md-3">
+        <div class="filters-sidebar">
+          <form action="/listings" method="get" id="filtersForm">
+            <div class="filters-header">
+              <span class="filters-title">Filters</span>
+              <a href="/listings" class="filters-reset">Reset</a>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-group">
+              <div class="filter-group-title">Category</div>
+              <% const categories=['Trending','Hill Stations','Beaches','Heritage','Backwaters','Forests','Desert','Pilgrimage','Farms','Houseboats']; %>
+                <% const catIcons={ 'Trending' :'fa-fire', 'Hill Stations' :'fa-mountain', 'Beaches' :'fa-umbrella-beach', 'Heritage' :'fa-landmark', 'Backwaters' :'fa-water', 'Forests' :'fa-tree', 'Desert' :'fa-sun', 'Pilgrimage' :'fa-place-of-worship', 'Farms' :'fa-tractor', 'Houseboats' :'fa-sailboat' }; %>
+                  <% for(let cat of categories){ %>
+                    <a href="/listings?category=<%= cat %>"
+                      class="filter-item <%= selectedCategory === cat || (!selectedCategory && cat === 'Trending') ? 'active' : '' %>">
+                      <i class="fa-solid <%= catIcons[cat] %>"></i>
+                      <span>
+                        <%= cat %>
+                      </span>
+                    </a>
+                    <% } %>
+            </div>
+
+            <!-- Property Type Filter -->
+            <div class="filter-group mt-3">
+              <div class="filter-group-title">Property type</div>
+              <% const propTypes=['Villa','Homestay','Cabin','Beach House','Heritage Haveli','Apartment','Farm Stay','Treehouse','Houseboat']; %>
+                <% for(let pt of propTypes){ %>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" name="propertyType" value="<%= pt %>" <%= selectedPropertyType === pt ? 'checked' : '' %>>
+                    <%= pt %>
+                  </label>
+                  <% } %>
+            </div>
+
+            <!-- Amenities Filter -->
+            <div class="filter-group mt-3">
+              <div class="filter-group-title">Amenities</div>
+              <div class="row g-0">
+                <div class="col-6">
+                  <label class="filter-checkbox"><input type="checkbox"> WiFi</label>
+                  <label class="filter-checkbox"><input type="checkbox"> Pool</label>
+                </div>
+                <div class="col-6">
+                  <label class="filter-checkbox"><input type="checkbox"> Kitchen</label>
+                  <label class="filter-checkbox"><input type="checkbox"> Parking</label>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-apply-filters mt-3">Apply Filters</button>
+          </form>
         </div>
-    <% } %>
-            
-</div>
-<script>
-    let taxSwitch = document.getElementById("switchCheckDefault");
-    taxSwitch.addEventListener("click",()=> {
-        let taxInfo = document.getElementsByClassName("tax-info");
-        for(info of taxInfo){
-            if(info.style.display != "inline" ){
-                info.style.display = "inline";
-            }else{
-                info.style.display = "none";
-            }
-        }
-    });
-</script>
+      </div>
+
+      <!-- RIGHT: Listings Grid -->
+      <div class="col-lg-10 col-md-9">
+
+        <!-- Results Header -->
+        <div class="results-header">
+          <div>
+            <h5 class="results-title">
+              Stays in India
+              <% if(typeof searchQuery !=='undefined' && searchQuery){ %>
+                &mdash; "<%= searchQuery %>"
+                  <% } %>
+            </h5>
+            <p class="results-meta">
+              <%= allListings.length %> stays available
+            </p>
+          </div>
+          <div class="sort-wrap">
+            <span class="sort-label">Sort by</span>
+            <select class="sort-select" form="filtersForm" name="sort" onchange="document.getElementById('filtersForm').submit()">
+              <option value="">Recommended</option>
+              <option value="price_asc" <%= selectedSort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+              <option value="price_desc" <%= selectedSort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+              <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="row row-cols-xl-3 row-cols-lg-2 row-cols-md-2 row-cols-sm-1 g-4">
+          <% for(let listing of allListings){ %>
+            <div class="col">
+              <div class="listing-card-new">
+
+                <!-- Image -->
+                <div class="listing-img-wrap">
+                  <a href="/listings/<%= listing._id %>">
+                    <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="listing-img" />
+                  </a>
+
+                  <!-- Wishlist heart -->
+                  <% if(currUser){ %>
+                    <% const isInWishlist=userWishlist.includes(listing._id.toString()); const action=isInWishlist
+                      ? 'remove' : 'add' ; const heartIcon=isInWishlist ? 'fa-solid' : 'fa-regular' ; const
+                      method=isInWishlist ? 'DELETE' : 'POST' ; %>
+                      <form method="POST"
+                        action="/wishlist/<%= action %>/<%= listing._id %><%= isInWishlist ? '?_method=DELETE' : '' %>"
+                        class="heart-form">
+                        <button type="button" onclick="event.stopPropagation(); this.closest('form').submit();"
+                          class="heart-btn">
+                          <i class="<%= heartIcon %> fa-heart"></i>
+                        </button>
+                      </form>
+                      <% } %>
+
+                        <!-- Property type badge -->
+                        <% if(listing.propertyType){ %>
+                          <span class="prop-badge">
+                            <%= listing.propertyType %>
+                          </span>
+                          <% } %>
+                </div>
+
+                <!-- Card Body -->
+                <div class="listing-card-body">
+                  <a href="/listings/<%= listing._id %>" class="listing-link">
+                    <div class="listing-card-title">
+                      <%= listing.title %>
+                    </div>
+                    <div class="listing-card-location">
+                      <i class="fa-solid fa-location-dot"></i>
+                      <%= listing.location %>, <%= listing.country %>
+                    </div>
+                    <div class="listing-card-meta">
+                      <% if(listing.bedrooms){ %>
+                        <%= listing.bedrooms %> bed &bull;<% } %>
+                            <% if(listing.bathrooms){ %>
+                              <%= listing.bathrooms %> bath &bull;<% } %>
+                                  <% if(listing.amenities && listing.amenities[0]){ %>
+                                    <%= listing.amenities[0] %>
+                                      <% } %>
+                    </div>
+                    <div class="listing-card-price">
+                      &#8377;<%= listing.price.toLocaleString("en-IN") %>
+                        <span>/night</span>
+                    </div>
+                  </a>
+                </div>
+
+              </div>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- No results -->
+        <% if(allListings.length===0){ %>
+          <div class="no-results">
+            <i class="fa-solid fa-magnifying-glass fa-2x mb-3" style="color:var(--color-muted);"></i>
+            <h5>No stays found</h5>
+            <p>Try a different search or browse all listings</p>
+            <a href="/listings" class="btn-cta btn px-4 mt-2">Browse All</a>
+          </div>
+          <% } %>
+
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Search Section */
+    .search-section {
+      background: var(--color-bg);
+      padding: 1.5rem 0;
+      border-bottom: 1px solid #ede5d8;
+    }
+
+    .search-box {
+      background: var(--color-white);
+      border: 1.5px solid #e0d5c8;
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      box-shadow: var(--shadow);
+      max-width: 85%;
+      margin: 0 auto;
+    }
+
+    .search-form-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .search-field {
+      flex: 1;
+      min-width: 180px;
+      padding: 0 1rem;
+    }
+
+    .search-field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .search-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-input-wrap i {
+      color: var(--color-muted);
+      font-size: 0.9rem;
+    }
+
+    .search-input-wrap input {
+      border: none;
+      outline: none;
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+      color: var(--color-text);
+      background: transparent;
+      width: 100%;
+    }
+
+    .search-input-wrap input::placeholder {
+      color: var(--color-muted);
+    }
+
+    .search-suggestions {
+      font-size: 0.75rem;
+      color: var(--color-muted);
+      margin-top: 0.3rem;
+    }
+
+    .search-suggestions a {
+      color: var(--color-muted);
+      text-decoration: underline;
+      margin-left: 0.5rem;
+    }
+
+    .search-divider {
+      width: 1px;
+      height: 40px;
+      background: #e0d5c8;
+      margin: 0 0.5rem;
+    }
+
+    .search-submit-btn {
+      background-color: var(--color-cta);
+      color: var(--color-white);
+      border: none;
+      border-radius: 10px;
+      padding: 0.7rem 1.8rem;
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .search-submit-btn:hover {
+      background-color: #c9692e;
+    }
+
+    /* Filters Sidebar */
+    .filters-sidebar {
+      background: var(--color-white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.2rem;
+      position: sticky;
+      top: 90px;
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+    }
+
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .filters-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--color-text);
+    }
+
+    .filters-reset {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      text-decoration: underline;
+    }
+
+    .filter-group-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: var(--color-text);
+      text-decoration: none;
+      transition: background 0.15s;
+      margin-bottom: 0.1rem;
+    }
+
+    .filter-item i {
+      color: var(--color-nav);
+      width: 16px;
+      font-size: 0.85rem;
+    }
+
+    .filter-item:hover {
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+
+    .filter-item.active {
+      background: var(--color-nav);
+      color: var(--color-white);
+      font-weight: 600;
+    }
+
+    .filter-item.active i {
+      color: var(--color-white);
+    }
+
+    .filter-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      color: var(--color-text);
+      margin-bottom: 0.4rem;
+      cursor: pointer;
+    }
+
+    .filter-checkbox input {
+      accent-color: var(--color-nav);
+    }
+
+    .btn-apply-filters {
+      width: 100%;
+      background-color: var(--color-nav);
+      color: var(--color-white);
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem;
+      font-family: var(--font-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-apply-filters:hover {
+      background-color: #5a6b2a;
+    }
+
+    /* Results Header */
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .results-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin: 0;
+    }
+
+    .results-meta {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      margin: 0;
+    }
+
+    .sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sort-label {
+      font-size: 0.82rem;
+      color: var(--color-muted);
+    }
+
+    .sort-select {
+      border: 1.5px solid #e0d5c8;
+      border-radius: 8px;
+      padding: 0.3rem 0.8rem;
+      font-family: var(--font-main);
+      font-size: 0.82rem;
+      color: var(--color-text);
+      background: var(--color-white);
+      cursor: pointer;
+    }
+
+    /* Listing Cards */
+    .listing-card-new {
+      background: var(--color-white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      height: 100%;
+    }
+
+    .listing-card-new:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(44, 36, 22, 0.14);
+    }
+
+    .listing-img-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .listing-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .listing-card-new:hover .listing-img {
+      transform: scale(1.03);
+    }
+
+    .heart-form {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .heart-btn {
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .heart-btn:hover {
+      background: white;
+    }
+
+    .heart-btn i {
+      color: #e74c3c;
+      font-size: 1rem;
+    }
+
+    .prop-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--color-nav);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    .listing-card-body {
+      padding: 1rem;
+    }
+
+    .listing-link {
+      text-decoration: none;
+      color: var(--color-text);
+    }
+
+    .listing-card-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--color-text);
+      margin-bottom: 0.2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .listing-card-location {
+      font-size: 0.78rem;
+      color: var(--color-muted);
+      margin-bottom: 0.2rem;
+    }
+
+    .listing-card-location i {
+      color: var(--color-cta);
+      font-size: 0.75rem;
+    }
+
+    .listing-card-meta {
+      font-size: 0.75rem;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .listing-card-price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-cta);
+    }
+
+    .listing-card-price span {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--color-muted);
+    }
+
+    /* No results */
+    .no-results {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--color-muted);
+    }
+  </style>

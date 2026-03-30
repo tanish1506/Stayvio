@@ -8,6 +8,18 @@ module.exports.listingSchema = Joi.object({
         country : Joi.string().required(),
         price : Joi.number().required().min(0),
         image : Joi.string().allow("",null),
+        propertyType : Joi.string().allow("",null),
+        category : Joi.string().allow("",null),
+        maxGuests : Joi.number().allow("",null),
+        bedrooms : Joi.number().allow("",null),
+        bathrooms : Joi.number().allow("",null),
+        cleaningFee : Joi.number().allow("",null),
+        serviceFee : Joi.number().allow("",null),
+        cancellationPolicy : Joi.string().allow("",null),
+        amenities : Joi.alternatives().try(Joi.array().items(Joi.string()), Joi.string()).allow(null),
+        houseRulesText : Joi.string().allow("",null),
+        accessibilityNotes : Joi.string().allow("",null),
+        checkInInstructions : Joi.string().allow("",null),
     }).required()
 })
 

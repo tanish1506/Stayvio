@@ -1,45 +1,246 @@
 <% layout("/layouts/boilerplate") %>
 
-<div class="row mt-4">
-    <h2>My Wishlist</h2>
-    <hr>
-    
-    <% if(wishlistItems.length === 0) { %>
-        <div class="col-12 text-center mt-5">
-            <i class="fa-regular fa-heart" style="font-size: 5rem; color: #ccc;"></i>
-            <h4 class="mt-3">Your wishlist is empty</h4>
-            <p>Start adding your favorite listings!</p>
-            <a href="/listings" class="btn btn-primary mt-3">Explore Listings</a>
-        </div>
+<div class="wishlist-page">
+  <div class="container py-4">
+
+    <!-- Header -->
+    <div class="wishlist-header">
+      <div>
+        <h2 class="wishlist-title">My Wishlist</h2>
+        <p class="wishlist-sub"><%= wishlistItems.length %> saved properties</p>
+      </div>
+      <a href="/listings" class="btn-cta btn px-4">Explore More</a>
+    </div>
+
+    <% if(wishlistItems.length === 0){ %>
+      <!-- Empty State -->
+      <div class="wishlist-empty">
+        <i class="fa-regular fa-heart fa-3x mb-3" style="color:var(--color-muted);"></i>
+        <h5>Your wishlist is empty</h5>
+        <p>Start saving your favorite stays!</p>
+        <a href="/listings" class="btn-cta btn px-4 mt-2">Explore Listings</a>
+      </div>
+
     <% } else { %>
-        <div class="row row-cols-lg-3 mt-3 row-cols-md-2 row-cols-sm-1">
-            <% for(let listing of wishlistItems){ %> 
-                <div class="col mb-4">
-                    <div class="card show-card">
-                        <a href="/listings/<%= listing._id %>" class="listing-link">
-                            <img src="<%=listing.image.url %>" class="card-img-top" style="height: 20rem;" alt="listing_image">
-                            <div class="card-img-overlay"></div>
-                        </a>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <a href="/listings/<%= listing._id %>" class="listing-link">
-                                        <p class="card-text">
-                                            <b><%= listing.title %></b><br>
-                                            &#8377;<%= listing.price.toLocaleString("en-IN") %>/night
-                                        </p>
-                                    </a>
-                                </div>
-                                <form method="POST" action="/wishlist/remove/<%= listing._id %>?_method=DELETE" class="d-inline">
-                                    <button type="submit" class="btn btn-link text-danger p-0">
-                                        <i class="fa-solid fa-heart" style="font-size: 1.5rem;"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+
+      <div class="wishlist-layout">
+
+        <!-- LEFT: Cards Grid -->
+        <div class="wishlist-grid-wrap">
+          <div class="row row-cols-xl-3 row-cols-lg-2 row-cols-md-2 row-cols-sm-1 g-3">
+            <% for(let listing of wishlistItems){ %>
+              <div class="col">
+                <div class="wishlist-card">
+
+                  <!-- Image -->
+                  <div class="wishlist-card-img-wrap">
+                    <a href="/listings/<%= listing._id %>">
+                      <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="wishlist-card-img">
+                    </a>
+                    <!-- Remove from wishlist -->
+                    <form method="POST" action="/wishlist/remove/<%= listing._id %>?_method=DELETE" class="wishlist-heart-form">
+                      <button type="submit" class="wishlist-heart-btn" title="Remove from wishlist">
+                        <i class="fa-solid fa-heart"></i>
+                      </button>
+                    </form>
+                    <% if(listing.propertyType){ %>
+                      <span class="wishlist-prop-badge"><%= listing.propertyType %></span>
+                    <% } %>
+                  </div>
+
+                  <!-- Card Body -->
+                  <div class="wishlist-card-body">
+                    <a href="/listings/<%= listing._id %>" class="listing-link">
+                      <div class="wishlist-card-title"><%= listing.title %></div>
+                      <div class="wishlist-card-location">
+                        <i class="fa-solid fa-location-dot me-1" style="color:var(--color-cta); font-size:0.75rem;"></i>
+                        <%= listing.location %>, <%= listing.country %>
+                      </div>
+                      <% if(listing.bedrooms || listing.bathrooms){ %>
+                      <div class="wishlist-card-meta">
+                        <% if(listing.bedrooms){ %><%= listing.bedrooms %> bed &bull;<% } %>
+                        <% if(listing.bathrooms){ %> <%= listing.bathrooms %> bath<% } %>
+                      </div>
+                      <% } %>
+                      <div class="wishlist-card-price">
+                        ₹<%= listing.price.toLocaleString('en-IN') %>
+                        <span>/night</span>
+                      </div>
+                    </a>
+                    <div class="wishlist-card-actions">
+                      <a href="/listings/<%= listing._id %>" class="wishlist-action-btn book">Book Now</a>
+                      <form method="POST" action="/wishlist/remove/<%= listing._id %>?_method=DELETE" style="display:inline;">
+                        <button type="submit" class="wishlist-action-btn remove">Remove</button>
+                      </form>
                     </div>
+                  </div>
+
                 </div>
+              </div>
             <% } %>
+          </div>
         </div>
+
+        <!-- RIGHT: Smart Suggestions Sidebar -->
+        <div class="wishlist-sidebar">
+
+          <div class="wishlist-sidebar-card">
+            <div class="wishlist-sidebar-title">
+              <i class="fa-solid fa-lightbulb me-2" style="color:var(--color-cta);"></i>Smart Suggestions
+            </div>
+            <p class="wishlist-sidebar-sub">Properties and regions you may like based on your wishlist.</p>
+
+            <div class="wishlist-sidebar-section-title">Recommended properties</div>
+            <% for(let listing of wishlistItems.slice(0,3)){ %>
+            <div class="wishlist-rec-item">
+              <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="wishlist-rec-img">
+              <div class="wishlist-rec-info">
+                <div class="wishlist-rec-name"><%= listing.title.substring(0,20) %><%= listing.title.length > 20 ? '...' : '' %></div>
+                <div class="wishlist-rec-price">₹<%= listing.price.toLocaleString('en-IN') %>/night</div>
+              </div>
+              <a href="/listings/<%= listing._id %>" class="wishlist-rec-view">View</a>
+            </div>
+            <% } %>
+
+            <div class="wishlist-sidebar-section-title mt-3">Trending regions</div>
+            <% const regions = ['Goa Beaches', 'Manali Hills', 'Kerala Backwaters', 'Rajasthan Heritage']; %>
+            <% for(let region of regions){ %>
+            <div class="wishlist-region-item">
+              <i class="fa-solid fa-map-location-dot" style="color:var(--color-nav);"></i>
+              <span><%= region %></span>
+            </div>
+            <% } %>
+
+            <div class="wishlist-explore-box">
+              <div style="font-size:0.82rem; font-weight:600; margin-bottom:0.4rem;">Not sure where to start?</div>
+              <p style="font-size:0.75rem; color:var(--color-muted); margin-bottom:0.8rem;">Try our handpicked collections selected for your travel style.</p>
+              <a href="/listings" class="wishlist-explore-btn">Explore Collections</a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
     <% } %>
+  </div>
 </div>
+
+<style>
+.wishlist-page { background: var(--color-bg); min-height: 80vh; }
+
+.wishlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.wishlist-title { font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin: 0; }
+.wishlist-sub { font-size: 0.85rem; color: var(--color-muted); margin: 0; }
+
+.wishlist-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--color-muted);
+}
+
+.wishlist-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+.wishlist-grid-wrap { flex: 1; min-width: 0; }
+
+/* Cards */
+.wishlist-card {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+.wishlist-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(44,36,22,0.13); }
+.wishlist-card-img-wrap { position: relative; overflow: hidden; }
+.wishlist-card-img { width: 100%; height: 180px; object-fit: cover; display: block; transition: transform 0.3s; }
+.wishlist-card:hover .wishlist-card-img { transform: scale(1.03); }
+.wishlist-heart-form { position: absolute; top: 8px; right: 8px; }
+.wishlist-heart-btn {
+  background: rgba(255,255,255,0.9);
+  border: none;
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.2s;
+}
+.wishlist-heart-btn i { color: #e74c3c; font-size: 0.9rem; }
+.wishlist-prop-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(255,255,255,0.92);
+  color: var(--color-nav);
+  font-size: 0.7rem; font-weight: 600;
+  padding: 0.15rem 0.5rem; border-radius: 20px;
+}
+.wishlist-card-body { padding: 0.9rem; }
+.wishlist-card-title { font-weight: 600; font-size: 0.9rem; color: var(--color-text); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wishlist-card-location { font-size: 0.75rem; color: var(--color-muted); margin-bottom: 0.15rem; }
+.wishlist-card-meta { font-size: 0.72rem; color: var(--color-muted); margin-bottom: 0.3rem; }
+.wishlist-card-price { font-size: 0.95rem; font-weight: 700; color: var(--color-cta); margin-bottom: 0.6rem; }
+.wishlist-card-price span { font-size: 0.75rem; font-weight: 400; color: var(--color-muted); }
+.wishlist-card-actions { display: flex; gap: 0.5rem; }
+.wishlist-action-btn {
+  flex: 1; text-align: center; padding: 0.35rem 0.5rem;
+  border-radius: 8px; font-size: 0.78rem; font-weight: 500;
+  cursor: pointer; font-family: var(--font-main);
+  text-decoration: none; border: none; transition: opacity 0.2s;
+}
+.wishlist-action-btn:hover { opacity: 0.85; }
+.wishlist-action-btn.book { background: var(--color-cta); color: white; }
+.wishlist-action-btn.remove { background: #f0e8dc; color: var(--color-text); }
+
+/* Sidebar */
+.wishlist-sidebar { width: 260px; min-width: 260px; position: sticky; top: 90px; }
+.wishlist-sidebar-card {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.3rem;
+}
+.wishlist-sidebar-title { font-weight: 700; font-size: 0.95rem; color: var(--color-text); margin-bottom: 0.3rem; }
+.wishlist-sidebar-sub { font-size: 0.78rem; color: var(--color-muted); margin-bottom: 1rem; }
+.wishlist-sidebar-section-title { font-size: 0.78rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.6rem; }
+
+.wishlist-rec-item { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; }
+.wishlist-rec-img { width: 48px; height: 40px; border-radius: 8px; object-fit: cover; }
+.wishlist-rec-info { flex: 1; }
+.wishlist-rec-name { font-size: 0.8rem; font-weight: 600; color: var(--color-text); }
+.wishlist-rec-price { font-size: 0.72rem; color: var(--color-muted); }
+.wishlist-rec-view { font-size: 0.72rem; color: var(--color-cta); text-decoration: underline; white-space: nowrap; }
+
+.wishlist-region-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.82rem; color: var(--color-text);
+  padding: 0.3rem 0; border-bottom: 1px solid #f0e8dc;
+}
+.wishlist-region-item:last-of-type { border-bottom: none; }
+
+.wishlist-explore-box {
+  background: var(--color-bg);
+  border-radius: 10px;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+.wishlist-explore-btn {
+  display: block;
+  background: var(--color-cta);
+  color: white;
+  border-radius: 20px;
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+</style>

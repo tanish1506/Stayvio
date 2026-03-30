@@ -7,7 +7,7 @@ const geocodingClient = mbxGeocoding({accessToken : mapToken})
 module.exports.index = async (req,res)=>{
     // Get category and search from query parameters
     // Example: /listings?category=Mountains&search=cabin
-    const { category, search } = req.query;
+    const { category, search ,propertyType , sort} = req.query;
     
     // Build filter object dynamically
     let filter = {};
@@ -30,8 +30,18 @@ module.exports.index = async (req,res)=>{
         ];
     }
     
-    // Find listings based on combined filters
-    const allListings = await Listing.find(filter);
+    //propertyType filter
+    if(propertyType){
+        filter.propertyType = propertyType;
+    }
+
+    //sort option
+    let sortOption = {};
+    if(sort === 'price_asc') sortOption = {price : 1};
+    else if(sort === 'price_desc') sortOption = {price : -1};
+    else if(sort === 'newest') sortOption = {createdAt : -1};
+
+    const allListings = await Listing.find(filter).sort(sortOption);
     
     // Get user's wishlist if logged in
     let userWishlist = [];
@@ -44,6 +54,8 @@ module.exports.index = async (req,res)=>{
     res.render("./listings/index.ejs", { 
         allListings, 
         selectedCategory: category || null,
+        selectedPropertyType: propertyType || null,
+        selectedSort : sort || '',
         searchQuery: search || '',
         currUser: req.user,
         userWishlist: userWishlist
@@ -65,7 +77,6 @@ module.exports.showListings = async (req,res)=>{
 }
 
 module.exports.createListings = async (req,res,next)=>{
-    // let {title,description,image,price,location,country} = req.body;
     let coordinates = await geocodingClient.forwardGeocode({
         query: req.body.listing.location,
         limit: 1
@@ -75,15 +86,22 @@ module.exports.createListings = async (req,res,next)=>{
     let url = req.file.path;
     let filename = req.file.filename;
     
-    const newListing = new Listing(req.body.listing)
+    const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
     newListing.image = {url,filename};
-
     newListing.geometry = coordinates.body.features[0].geometry;
+
+    // houseRulesText ko array mein convert karo
+    if(req.body.listing.houseRulesText){
+        newListing.houseRules = req.body.listing.houseRulesText.split('\n').map(r => r.trim()).filter(r => r);
+    }
+    // amenities array handle
+    if(req.body.listing.amenities && !Array.isArray(req.body.listing.amenities)){
+        newListing.amenities = [req.body.listing.amenities];
+    }
     
-    let savedListing = await newListing.save();
-    
-    req.flash("sucess", " New Listing Created!!");
+    await newListing.save();
+    req.flash("sucess", "New Listing Created!!");
     res.redirect("/listings");    
 }
 
@@ -104,13 +122,23 @@ module.exports.updateListings = async (req,res)=>{
     let {id} = req.params;
     let listing = await Listing.findByIdAndUpdate(id , {...req.body.listing});
 
+    // houseRulesText ko array mein convert karo
+    if(req.body.listing.houseRulesText){
+        listing.houseRules = req.body.listing.houseRulesText.split('\n').map(r => r.trim()).filter(r => r);
+    }
+    // amenities array handle
+    if(req.body.listing.amenities && !Array.isArray(req.body.listing.amenities)){
+        listing.amenities = [req.body.listing.amenities];
+    } else if(req.body.listing.amenities) {
+        listing.amenities = req.body.listing.amenities;
+    }
+
     if(typeof req.file !== "undefined"){
         let url = req.file.path;
         let filename = req.file.filename;
         listing.image = {url , filename};
-        await listing.save();
     }
-
+    await listing.save();
     res.redirect(`/listings/${id}`);
 }
 

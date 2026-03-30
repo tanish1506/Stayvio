@@ -1,114 +1,229 @@
 <% layout('/layouts/boilerplate') %>
 
-    <div class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <!-- header -->
-                <div class="text-center mb-4">
-                    <h2>Booking Details</h2>
-                    <p class="text-muted"> Booking Id : <%= booking._id %>
-                    </p>
-                </div>
+<div class="bshow-page">
+  <div class="container py-4">
+    <div class="row g-4">
 
-                <!-- status -->
-                <div class="text-center mb-3">
-                    <% if(booking.status==='confirmed' ){ %>
-                        <span class="badge bg-success fs-6">Booking Confirmed!!</span>
-                        <% } else if(booking.status==='pending_payment' ){ %>
-                            <span class="badge bg-warning text-dark fs-6">Payment Pending!!</span>
-                            <% } else if(booking.status==='cancelled' ){ %>
-                                <span class="badge bg-danger fs-6">Booking Cancelled!!</span>
-                                <% } else{ %>
-                                    <span class="badge bg-secondary fs-6">Completed</span>
-                                    <% } %>
-                </div>
+      <!-- LEFT COLUMN -->
+      <div class="col-lg-7">
 
-                <!-- Listing details -->
-                <div class="card mb-4">
-                    <img src="<%= booking.listing.image.url %>" class="card-img-top" alt="<%= booking.listing.title %>"
-                        style="height: 250px; object-fit: cover;">
-                    <div class="card-body">
-                        <h4 class="card-title">
-                            <%= booking.listing.title %>
-                        </h4>
-                        <p class="text-muted">
-                            📍 <%= booking.listing.location %>, <%= booking.listing.country %>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- booking details -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Booking Summary</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-borderless">
-                            <tr>
-                                <td><strong>Check-in</strong></td>
-                                <td>
-                                    <%= new Date(booking.checkIn).toDateString() %>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Check-out</strong></td>
-                                <td>
-                                    <%= new Date(booking.checkOut).toDateString() %>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Guests</strong></td>
-                                <td>
-                                    <%= booking.guests %>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Nights</strong></td>
-                                <td>
-                                    <%= booking.nights %>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Price per night</strong></td>
-                                <td>₹<%= booking.listing.price.toLocaleString('en-IN') %>
-                                </td>
-                            </tr>
-                            <tr class="table-active">
-                                <td><strong>Total Price</strong></td>
-                                <td><strong>₹<%= booking.totalPrice.toLocaleString('en-IN') %></strong></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-
-                <div class="d-flex gap-2 justify-content-center">
-                    <a href="/bookings" class="btn btn-outline-secondary">
-                        My Bookings
-                    </a>
-                    <% if(booking.status==='pending_payment' ) { %>
-                        <button id="payNowBtn" class="btn btn-success" data-booking-id="<%= booking._id %>"
-                            data-amount="<%= booking.totalPrice * 100 %>" data-name="<%= booking.listing.title %>"
-                            data-user="<%= currUser.username %>" data-email="<%= currUser.email %>">
-                            Pay Now ₹<%= booking.totalPrice.toLocaleString('en-IN') %>
-                        </button>
-                        <% } %>
-                            <% if(booking.status !=='cancelled' && booking.status !=='completed' ) { %>
-                                <form action="/bookings/<%= booking._id %>?_method=DELETE" method="POST">
-                                    <button type="button" class="btn btn-outline-danger"
-                                        onclick="return confirm('Are you sure you want to cancel?')">
-                                        Cancel Booking
-                                    </button>
-                                </form>
-                            <% } %>
-                </div>
-
-
+        <!-- Listing Header Card -->
+        <div class="bshow-card mb-3">
+          <div class="bshow-listing-header">
+            <img src="<%= booking.listing.image.url %>" alt="<%= booking.listing.title %>" class="bshow-listing-img">
+            <div class="bshow-listing-info">
+              <div class="bshow-listing-title"><%= booking.listing.title %></div>
+              <div class="bshow-listing-location">
+                <i class="fa-solid fa-location-dot me-1" style="color:var(--color-cta);"></i>
+                <%= booking.listing.location %>, <%= booking.listing.country %>
+              </div>
+              <div class="bshow-listing-meta">
+                <%= new Date(booking.checkIn).toDateString() %> &mdash; <%= new Date(booking.checkOut).toDateString() %>
+                &nbsp;&bull;&nbsp; <%= booking.guests %> guests
+              </div>
+              <div class="bshow-total-paid">
+                Total Paid — ₹<%= booking.totalPrice.toLocaleString('en-IN') %>
+              </div>
             </div>
-
+            <div class="bshow-listing-actions">
+              <% if(booking.status === 'pending_payment'){ %>
+                <button type="button" id="payNowBtn" class="bshow-btn-pay"
+                  data-booking-id="<%= booking._id %>"
+                  data-amount="<%= booking.totalPrice * 100 %>"
+                  data-name="<%= booking.listing.title %>"
+                  data-user="<%= currUser.username %>"
+                  data-email="<%= currUser.email %>">
+                  Pay Now
+                </button>
+              <% } %>
+              <a href="/bookings" class="bshow-btn-secondary">My Bookings</a>
+            </div>
+          </div>
         </div>
+
+        <!-- Reservation Summary -->
+        <div class="bshow-card mb-3">
+          <div class="bshow-section-title">Reservation Summary</div>
+          <div class="bshow-summary-row">
+            <div>
+              <div class="bshow-meta-line">Booking ID: <span><%= booking._id %></span></div>
+              <div class="bshow-meta-line">Guests: <span><%= booking.guests %></span> &nbsp;&bull;&nbsp; Nights: <span><%= booking.nights %></span></div>
+              <div class="bshow-meta-line">Check-in: <span><%= new Date(booking.checkIn).toDateString() %></span></div>
+              <div class="bshow-meta-line">Check-out: <span><%= new Date(booking.checkOut).toDateString() %></span></div>
+            </div>
+            <div class="bshow-status-wrap">
+              <% if(booking.status === 'confirmed'){ %>
+                <span class="bshow-status confirmed">Confirmed</span>
+              <% } else if(booking.status === 'pending_payment'){ %>
+                <span class="bshow-status pending">Payment Pending</span>
+              <% } else if(booking.status === 'cancelled'){ %>
+                <span class="bshow-status cancelled">Cancelled</span>
+              <% } else { %>
+                <span class="bshow-status completed">Completed</span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Receipt -->
+        <div class="bshow-card mb-3">
+          <div class="bshow-section-title">Payment Receipt</div>
+          <div class="bshow-receipt-row">
+            <span>Nightly rate (<%= booking.nights %> nights)</span>
+            <span>₹<%= booking.listing.price.toLocaleString('en-IN') %> × <%= booking.nights %></span>
+          </div>
+          <% if(booking.listing.cleaningFee){ %>
+          <div class="bshow-receipt-row">
+            <span>Cleaning fee</span>
+            <span>₹<%= booking.listing.cleaningFee.toLocaleString('en-IN') %></span>
+          </div>
+          <% } %>
+          <% if(booking.listing.serviceFee){ %>
+          <div class="bshow-receipt-row">
+            <span>Service fee</span>
+            <span>₹<%= booking.listing.serviceFee.toLocaleString('en-IN') %></span>
+          </div>
+          <% } %>
+          <div class="bshow-receipt-total">
+            <span>Total paid</span>
+            <span>₹<%= booking.totalPrice.toLocaleString('en-IN') %></span>
+          </div>
+        </div>
+
+        <!-- Refund Policy -->
+        <div class="bshow-card mb-3">
+          <div class="bshow-section-title">Refund Policy</div>
+          <p class="bshow-policy-text">
+            <% if(booking.listing.cancellationPolicy === 'Flexible'){ %>
+              Full refund if cancellation occurs within 48 hours of booking and at least 14 days before check-in.
+            <% } else if(booking.listing.cancellationPolicy === 'Moderate'){ %>
+              Full refund up to 24 hours before check-in, minus service fee. No refunds within 7 days of arrival.
+            <% } else { %>
+              No refunds within 7 days of arrival unless extenuating circumstances apply.
+            <% } %>
+          </p>
+          <div class="bshow-policy-summary">
+            Summary: Cancellation policy is <strong><%= booking.listing.cancellationPolicy || 'Flexible' %></strong>.
+          </div>
+        </div>
+
+        <!-- Check-in Instructions -->
+        <% if(booking.listing.checkInInstructions){ %>
+        <div class="bshow-card mb-3">
+          <div class="bshow-section-title">Check-in Instructions</div>
+          <p class="bshow-policy-text"><%= booking.listing.checkInInstructions %></p>
+        </div>
+        <% } %>
+
+        <!-- Cancel Button -->
+        <% if(booking.status !== 'cancelled' && booking.status !== 'completed'){ %>
+        <form action="/bookings/<%= booking._id %>?_method=DELETE" method="POST" class="mb-3">
+          <button type="submit" class="bshow-btn-cancel" onclick="return confirm('Are you sure you want to cancel?')">
+            <i class="fa-solid fa-xmark me-1"></i> Cancel Booking
+          </button>
+        </form>
+        <% } %>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="col-lg-5">
+
+        <!-- Manage Booking -->
+        <div class="bshow-card mb-3">
+          <div class="bshow-section-title">Manage Booking</div>
+          <button class="bshow-manage-btn outline mb-2">Modify Reservation</button>
+          <button class="bshow-manage-btn solid mb-2">Request Early Check-in</button>
+          <a href="/listings/<%= booking.listing._id %>#review" class="bshow-manage-btn outline">Leave a Review</a>
+          <p class="bshow-note">Note: Reviews can be left after checkout.</p>
+        </div>
+
+        <!-- Host Info -->
+        <div class="bshow-card mb-3">
+          <div class="bshow-host-row">
+            <div class="bshow-host-avatar">
+              <%= booking.listing.owner.username.charAt(0).toUpperCase() %>
+            </div>
+            <div>
+              <div class="bshow-host-name"><%= booking.listing.owner.username %></div>
+              <div class="bshow-host-meta">
+                <% if(booking.listing.owner.superhost){ %>Superhost &bull; <% } %>
+                <%= booking.listing.owner.responseRate ? booking.listing.owner.responseRate + '% response rate' : 'Responsive host' %>
+              </div>
+            </div>
+          </div>
+          <div class="bshow-host-actions">
+            <button class="bshow-host-btn message">
+              <i class="fa-regular fa-comment me-1"></i> Message
+            </button>
+            <button class="bshow-host-btn profile">
+              <i class="fa-regular fa-user me-1"></i> View Profile
+            </button>
+          </div>
+        </div>
+
+        <!-- House Rules -->
+        <% if(booking.listing.houseRules && booking.listing.houseRules.length > 0){ %>
+        <div class="bshow-card mb-3">
+          <div class="bshow-section-title">House Rules & Reminders</div>
+          <ul class="bshow-rules-list">
+            <% for(let rule of booking.listing.houseRules){ %>
+              <li><%= rule %></li>
+            <% } %>
+          </ul>
+        </div>
+        <% } %>
+
+      </div>
     </div>
-    <% if(booking.status==='pending_payment' ){ %>
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-        <script src="/js/payment.js"></script>
-    <% } %>
+  </div>
+</div>
+
+<% if(booking.status === 'pending_payment'){ %>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="/js/payment.js"></script>
+<% } %>
+
+<style>
+.bshow-page { background: var(--color-bg); min-height: 80vh; }
+.bshow-card { background: var(--color-white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.4rem 1.5rem; }
+.bshow-section-title { font-weight: 700; font-size: 0.95rem; color: var(--color-text); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0e8dc; }
+.bshow-listing-header { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+.bshow-listing-img { width: 90px; height: 70px; border-radius: 10px; object-fit: cover; }
+.bshow-listing-info { flex: 1; min-width: 150px; }
+.bshow-listing-title { font-weight: 700; font-size: 1rem; color: var(--color-text); margin-bottom: 0.2rem; }
+.bshow-listing-location { font-size: 0.8rem; color: var(--color-muted); margin-bottom: 0.2rem; }
+.bshow-listing-meta { font-size: 0.78rem; color: var(--color-muted); margin-bottom: 0.3rem; }
+.bshow-total-paid { font-size: 0.82rem; font-weight: 600; color: var(--color-cta); background: #fef3e8; display: inline-block; padding: 0.2rem 0.6rem; border-radius: 6px; }
+.bshow-listing-actions { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; }
+.bshow-btn-pay { background: var(--color-cta); color: white; border: none; border-radius: 20px; padding: 0.4rem 1.2rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font-main); }
+.bshow-btn-secondary { background: #f0e8dc; color: var(--color-text); border-radius: 20px; padding: 0.4rem 1.2rem; font-size: 0.82rem; font-weight: 500; text-decoration: none; text-align: center; }
+.bshow-summary-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.bshow-meta-line { font-size: 0.82rem; color: var(--color-muted); margin-bottom: 0.3rem; }
+.bshow-meta-line span { color: var(--color-text); font-weight: 500; }
+.bshow-status { font-size: 0.78rem; font-weight: 600; padding: 0.25rem 0.8rem; border-radius: 20px; color: white; }
+.bshow-status.confirmed { background: #27ae60; }
+.bshow-status.pending { background: var(--color-cta); }
+.bshow-status.cancelled { background: #e74c3c; }
+.bshow-status.completed { background: #95a5a6; }
+.bshow-receipt-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--color-muted); padding: 0.4rem 0; border-bottom: 1px solid #f8f3ed; }
+.bshow-receipt-total { display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 700; color: var(--color-text); padding-top: 0.6rem; margin-top: 0.2rem; }
+.bshow-policy-text { font-size: 0.85rem; color: var(--color-muted); line-height: 1.7; margin-bottom: 0.8rem; }
+.bshow-policy-summary { background: #fef3e8; border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.82rem; color: var(--color-text); }
+.bshow-btn-cancel { background: transparent; border: 1.5px solid #e74c3c; color: #e74c3c; border-radius: 8px; padding: 0.5rem 1.5rem; font-size: 0.88rem; font-weight: 500; cursor: pointer; font-family: var(--font-main); }
+.bshow-manage-btn { display: block; width: 100%; padding: 0.6rem; border-radius: 8px; font-size: 0.88rem; font-weight: 500; cursor: pointer; font-family: var(--font-main); text-align: center; }
+.bshow-manage-btn.outline { background: transparent; border: 1.5px solid #e0d5c8; color: var(--color-text); }
+.bshow-manage-btn.solid { background: var(--color-nav); border: none; color: white; }
+.bshow-note { font-size: 0.75rem; color: var(--color-muted); margin-top: 0.5rem; margin-bottom: 0; }
+.bshow-host-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+.bshow-host-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--color-nav); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+.bshow-host-name { font-weight: 600; font-size: 0.9rem; }
+.bshow-host-meta { font-size: 0.75rem; color: var(--color-muted); }
+.bshow-host-actions { display: flex; gap: 0.6rem; }
+.bshow-host-btn { flex: 1; padding: 0.5rem; border-radius: 8px; font-size: 0.82rem; font-weight: 500; cursor: pointer; font-family: var(--font-main); border: 1.5px solid #e0d5c8; background: transparent; color: var(--color-text); }
+.bshow-host-btn.message { background: var(--color-cta); border-color: var(--color-cta); color: white; }
+.bshow-rules-list { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--color-muted); }
+.bshow-rules-list li { padding: 0.3rem 0; border-bottom: 1px solid #f8f3ed; }
+.bshow-rules-list li::before { content: "— "; color: var(--color-nav); }
+.bshow-rules-list li:last-child { border-bottom: none; }
+</style>

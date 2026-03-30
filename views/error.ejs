@@ -1,8 +1,159 @@
-<% layout("/layouts/boilerplate" ) %>
+<% layout("/layouts/boilerplate") %>
 
-<div class="row mt-3">
-    <div class="alert alert-danger col-6 offset-3" role="alert">
-        
-        <p class="alert-heading"><%= message %></p>
+<div class="error-page">
+  <div class="error-container">
+
+    <!-- Funny GIF -->
+    <div class="error-gif-wrap">
+      <img 
+        src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDd3dGZ6dGZ6dGZ6dGZ6dGZ6dGZ6dGZ6dGZ6dGZ6dGZ6dGZ6dGZ6dA/14uQ3cOFteDaU/giphy.gif" 
+        alt="lost traveler"
+        class="error-gif"
+        onerror="this.src='https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif'"
+      >
     </div>
+
+    <div class="error-card">
+      <div class="error-emoji">🧳</div>
+      <h1 class="error-code">Yeh kahan aa gaye hum...</h1>
+      <h2 class="error-title">
+        <% if(message && message.includes('404')){ %>
+          Page packed its bags and left. 404.
+        <% } else { %>
+          Something went sideways on our end 😬
+        <% } %>
+      </h2>
+
+      <p class="error-message">
+        "<%= message %>"
+        <br>
+        <span style="font-size:0.78rem; opacity:0.7;">— Stayvio's confused server</span>
+      </p>
+
+      <div class="error-fun-text">
+        Don't worry, even the best travelers get lost sometimes. 
+        Let's get you back on track! 🗺️
+      </div>
+
+      <div class="error-actions">
+        <a href="/listings" class="error-btn-primary">
+          🏠 Take me home
+        </a>
+        <a href="javascript:history.back()" class="error-btn-secondary">
+          ← Go back
+        </a>
+      </div>
+
+      <div class="error-footer-note">
+        Still lost? <a href="#">Contact support</a> — we don't bite 🐾
+      </div>
+    </div>
+
+  </div>
 </div>
+
+<style>
+.error-page {
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  padding: 2rem 1rem;
+}
+.error-container {
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+}
+.error-gif-wrap {
+  margin-bottom: 1.5rem;
+}
+.error-gif {
+  width: 220px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+.error-card {
+  background: var(--color-white);
+  border-radius: 24px;
+  box-shadow: 0 8px 40px rgba(44,36,22,0.12);
+  padding: 2.5rem 2.5rem 2rem;
+}
+.error-emoji {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  animation: bounce 1.5s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.error-code {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 0.3rem;
+  font-family: var(--font-main);
+}
+.error-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+.error-message {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  background: #fef3e8;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  font-style: italic;
+}
+.error-fun-text {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+.error-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+.error-btn-primary {
+  background: var(--color-cta);
+  color: white;
+  border-radius: 25px;
+  padding: 0.6rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+  font-family: var(--font-main);
+}
+.error-btn-primary:hover { background: #c9692e; color: white; }
+.error-btn-secondary {
+  background: #f0e8dc;
+  color: var(--color-text);
+  border-radius: 25px;
+  padding: 0.6rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+  font-family: var(--font-main);
+}
+.error-btn-secondary:hover { background: #e0d5c8; }
+.error-footer-note {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+.error-footer-note a { color: var(--color-cta); text-decoration: underline; }
+</style>

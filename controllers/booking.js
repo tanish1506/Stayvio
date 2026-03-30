@@ -94,7 +94,7 @@ module.exports.showBooking = async(req,res) => {
     const {id} = req.params;
 
     //booking dhundhna 
-    const booking = await Booking.findById(id).populate('user').populate('listing');
+    const booking = await Booking.findById(id).populate('user').populate({path : 'listing',populate : {path : 'owner'}});
 
     if(!booking){
         req.flash('error',"Booking Not Found!!");

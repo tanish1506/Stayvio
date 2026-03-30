@@ -71,3 +71,12 @@ module.exports.validateBooking = (req,res,next) => {
         next();
     }
 }
+
+module.exports.isHost = (req,res,next)=>{
+    if(req.user.role === 'host' || req.user.role === 'both'){
+        next();
+    }else{
+        req.flash("error","You must be a host to perform this action!");
+        res.redirect("/listings");
+    }
+}

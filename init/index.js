@@ -1,9 +1,12 @@
+const path = require("path");
+require('dotenv').config({path : path.join(__dirname, '../.env')});
+
 const mongoose = require('mongoose')
 const initdata = require('./data')
 
 const Listing = require('../models/listing')
 
-const Mongo_url = "mongodb://127.0.0.1:27017/stayvio"
+const Mongo_url = process.env.MONGO_URL;
 
 main()
 .then(() => {
@@ -18,7 +21,7 @@ async function main() {
 
 const initDB = async () =>{
     await Listing.deleteMany({});
-    initdata.data = initdata.data.map((obj) => ({...obj , owner : "69943031a66fcd4dcecd1145"}))
+    initdata.data = initdata.data.map((obj) => ({...obj , owner : "69c98cb31efc7d433aa5c3af"}))
     await Listing.insertMany(initdata.data)
     console.log("Data initialized");
 }

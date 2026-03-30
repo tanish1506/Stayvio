@@ -1,50 +1,243 @@
 <% layout("/layouts/boilerplate") %>
 
-<body>
-    <div class="row mt-3">
-        <div class="col-6 offset-3">
-            
-            <br>
-            <form method="post" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
-                <div class="mb-2">
-                    <label for="title" class="form-label">Title</label>
-                    <input type="text" name="listing[title]" class="form-control"  required/>
-                    <div class="valid-feedback">Title looks good!!</div>
-                    <div class="invalid-feedback">Enter catchy Title!!</div>
-                </div>
-                
-                <div class="mb-2">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea name="listing[description]" class="form-control" required></textarea>
-                </div>
+<div class="lform-page">
+  <div class="container py-4">
+    <div class="lform-wrap">
 
-                <div class="mb-2"> 
-                    <label for="image" class="form-label">Upload Image</label>
-                    <input type="file" required name="listing[image]" class="form-control">
-                </div>
-                
-                <div class="row">
-                    <div class="mb-2 col-md-4"> 
-                        <label for="price" class="form-label">Price</label>
-                        <input type="text" name="listing[price]" class="form-control" required>
-                        <div class="invalid-feedback">Please enter valid price!!</div>
-                    </div>
+      <div class="lform-header">
+        <h2 class="lform-title">List Your Space</h2>
+        <p class="lform-sub">Share your property with travelers across India</p>
+      </div>
 
-                    <div class="mb-2 col-md-8">
-                        <label for="location" class="form-label">Location</label>
-                        <input type="text" name="listing[location]" class="form-control" required>
-                        <div class="invalid-feedback">Please enter valid Location!!</div>
-                    </div>
-                    
-                </div>
-                <div class="mb-2 col-8">
-                    <label for="country" class="form-label">Country</label>
-                    <input type="text" name="listing[country]" class="form-control" required>
-                    <div class="invalid-feedback">Please enter valid Country!!</div> 
-                </div>
-                <br><br>
-                <button class="btn btn-dark add-btn">Add</button><br>
-            </form>
+      <form method="post" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
+
+        <!-- Basic Info -->
+        <div class="lform-section">
+          <div class="lform-section-title">Basic Information</div>
+
+          <div class="lform-field">
+            <label>Property Title</label>
+            <input type="text" name="listing[title]" class="lform-input" placeholder="e.g. Cozy Beach House in Goa" required/>
+            <div class="invalid-feedback">Enter a catchy title!</div>
+          </div>
+
+          <div class="lform-field">
+            <label>Description</label>
+            <textarea name="listing[description]" class="lform-input" rows="4" placeholder="Describe your space, what makes it special..." required></textarea>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="lform-field">
+                <label>Property Type</label>
+                <select name="listing[propertyType]" class="lform-input">
+                  <option value="">Select type</option>
+                  <% ['Villa','Homestay','Cabin','Beach House','Heritage Haveli','Apartment','Farm Stay','Treehouse','Houseboat','Tent/Glamping'].forEach(t => { %>
+                    <option value="<%= t %>"><%= t %></option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="lform-field">
+                <label>Category</label>
+                <select name="listing[category]" class="lform-input">
+                  <option value="">Select category</option>
+                  <% ['Trending','Hill Stations','Beaches','Heritage','Backwaters','Forests','Desert','Pilgrimage','Farms','Houseboats'].forEach(c => { %>
+                    <option value="<%= c %>"><%= c %></option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Location & Pricing -->
+        <div class="lform-section">
+          <div class="lform-section-title">Location & Pricing</div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="lform-field">
+                <label>Location / City</label>
+                <input type="text" name="listing[location]" class="lform-input" placeholder="e.g. Goa" required/>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="lform-field">
+                <label>Country</label>
+                <input type="text" name="listing[country]" class="lform-input" placeholder="India" value="India" required/>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="lform-field">
+                <label>Price per night (₹)</label>
+                <input type="number" name="listing[price]" class="lform-input" placeholder="2000" required/>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="lform-field">
+                <label>Cleaning Fee (₹)</label>
+                <input type="number" name="listing[cleaningFee]" class="lform-input" placeholder="500"/>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="lform-field">
+                <label>Service Fee (₹)</label>
+                <input type="number" name="listing[serviceFee]" class="lform-input" placeholder="300"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Property Details -->
+        <div class="lform-section">
+          <div class="lform-section-title">Property Details</div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="lform-field">
+                <label>Max Guests</label>
+                <input type="number" name="listing[maxGuests]" class="lform-input" placeholder="4" min="1"/>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="lform-field">
+                <label>Bedrooms</label>
+                <input type="number" name="listing[bedrooms]" class="lform-input" placeholder="2" min="0"/>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="lform-field">
+                <label>Bathrooms</label>
+                <input type="number" name="listing[bathrooms]" class="lform-input" placeholder="1" min="0"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="lform-field mt-3">
+            <label>Cancellation Policy</label>
+            <select name="listing[cancellationPolicy]" class="lform-input">
+              <option value="Flexible">Flexible — Full refund 48hrs before check-in</option>
+              <option value="Moderate">Moderate — Full refund 24hrs before check-in</option>
+              <option value="Strict">Strict — No refund within 7 days</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="lform-section">
+          <div class="lform-section-title">Amenities</div>
+          <p class="lform-hint">Select all that apply</p>
+          <div class="lform-amenities-grid">
+            <% ['WiFi','Pool','Kitchen','AC','Parking','Bonfire','Heater','Mountain View','Sea View','Forest View','Breakfast','Meals Included','Yoga Deck','Hot Water','Garden','City View','Washer','TV'].forEach(a => { %>
+              <label class="lform-amenity-check">
+                <input type="checkbox" name="listing[amenities]" value="<%= a %>">
+                <span><%= a %></span>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- House Rules -->
+        <div class="lform-section">
+          <div class="lform-section-title">House Rules</div>
+          <p class="lform-hint">Add rules for your guests (one per line)</p>
+          <textarea name="listing[houseRulesText]" class="lform-input" rows="3" placeholder="No smoking inside&#10;No loud music after 10PM&#10;ID required at check-in"></textarea>
+        </div>
+
+        <!-- Extra Info -->
+        <div class="lform-section">
+          <div class="lform-section-title">Additional Information</div>
+          <div class="lform-field">
+            <label>Accessibility Notes</label>
+            <input type="text" name="listing[accessibilityNotes]" class="lform-input" placeholder="e.g. Ground floor access available"/>
+          </div>
+          <div class="lform-field">
+            <label>Check-in Instructions</label>
+            <input type="text" name="listing[checkInInstructions]" class="lform-input" placeholder="e.g. Self check-in with lockbox"/>
+          </div>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="lform-section">
+          <div class="lform-section-title">Property Image</div>
+          <div class="lform-field">
+            <label>Upload Main Image</label>
+            <input type="file" name="listing[image]" class="lform-input" required/>
+          </div>
+        </div>
+
+        <button type="submit" class="lform-submit-btn">
+          <i class="fa-solid fa-plus me-2"></i>Create Listing
+        </button>
+
+      </form>
     </div>
-</body>
+  </div>
+</div>
+
+<style>
+.lform-page { background: var(--color-bg); min-height: 80vh; }
+.lform-wrap { max-width: 780px; margin: 0 auto; }
+.lform-header { margin-bottom: 2rem; }
+.lform-title { font-size: 1.6rem; font-weight: 700; color: var(--color-text); margin: 0; }
+.lform-sub { font-size: 0.88rem; color: var(--color-muted); margin: 0.3rem 0 0; }
+.lform-section {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+.lform-section-title { font-weight: 700; font-size: 0.95rem; color: var(--color-text); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0e8dc; }
+.lform-field { margin-bottom: 1rem; }
+.lform-field:last-child { margin-bottom: 0; }
+.lform-field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--color-text); margin-bottom: 0.3rem; }
+.lform-hint { font-size: 0.78rem; color: var(--color-muted); margin-bottom: 0.8rem; }
+.lform-input {
+  width: 100%;
+  border: 1.5px solid #e0d5c8;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  outline: none;
+  transition: border 0.2s;
+}
+.lform-input:focus { border-color: var(--color-nav); }
+.lform-amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+.lform-amenity-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border: 1.5px solid #e0d5c8;
+  border-radius: 8px;
+  transition: border 0.15s, background 0.15s;
+}
+.lform-amenity-check:has(input:checked) { border-color: var(--color-nav); background: #f0f4e8; font-weight: 600; }
+.lform-amenity-check input { accent-color: var(--color-nav); }
+.lform-submit-btn {
+  width: 100%;
+  background: var(--color-cta);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-main);
+  transition: background 0.2s;
+  margin-top: 0.5rem;
+}
+.lform-submit-btn:hover { background: #c9692e; }
+</style>

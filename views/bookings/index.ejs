@@ -1,84 +1,391 @@
 <% layout('/layouts/boilerplate')%>
 
-<div class="container my-5">
+<div class="bookings-page">
+  <div class="container py-4">
+    <div class="bookings-layout">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Bookings</h2>
-        <a href="/listings" class="btn btn-outline-primary">Explore More</a>
+      <!-- LEFT SIDEBAR -->
+      <div class="bookings-sidebar">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">
+            <%= currUser.username.charAt(0).toUpperCase() %>
+          </div>
+          <div class="sidebar-username"><%= currUser.username %></div>
+          <div class="sidebar-role"><%= currUser.role === 'host' ? 'Host Member' : 'Guest Member' %></div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#" class="sidebar-nav-link">
+            <i class="fa-regular fa-user"></i> Profile
+          </a>
+          <a href="/bookings" class="sidebar-nav-link active">
+            <i class="fa-regular fa-calendar-check"></i> My Bookings
+          </a>
+          <a href="/wishlist" class="sidebar-nav-link">
+            <i class="fa-regular fa-heart"></i> Wishlist
+          </a>
+          <a href="#" class="sidebar-nav-link">
+            <i class="fa-regular fa-credit-card"></i> Payments
+          </a>
+        </nav>
+
+        <div class="sidebar-footer-links">
+          <a href="#" class="sidebar-footer-link">View Profile</a>
+          <a href="/logout" class="sidebar-logout-btn">Logout</a>
+        </div>
+
+        <div class="sidebar-help">
+          <div class="sidebar-help-title">Need quick help?</div>
+          <p class="sidebar-help-text">Our team is available 24/7 to help with bookings, refunds, and modifications.</p>
+          <a href="#" class="sidebar-help-btn">
+            <i class="fa-solid fa-headset me-1"></i> Contact Support
+          </a>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="bookings-main">
+
+    <!-- Header -->
+    <div class="bookings-header">
+      <div>
+        <h2 class="bookings-title">My Bookings</h2>
+        <p class="bookings-sub">Manage your upcoming stays and view past trips</p>
+      </div>
+      <a href="/listings" class="btn-cta btn px-4">Explore More</a>
     </div>
 
-    <!-- koi booking nhi  -->
     <% if(bookings.length === 0){ %>
-        <div>
-            <i class="fa-solid fa-calendar-xmark fa-3x text-muted mb-3"></i>
-            <h4 class="text-muted">No Bookings yet!</h4>
-            <p class="text-muted">Start exploring and book your perfect stay.</p>
-            <a href="/listings" class="btn btn-primary mt-2">Explore Listings</a>
-        </div>
+      <!-- Empty State -->
+      <div class="bookings-empty">
+        <i class="fa-solid fa-calendar-xmark fa-3x mb-3" style="color:var(--color-muted);"></i>
+        <h5>No bookings yet!</h5>
+        <p>Start exploring and book your perfect stay.</p>
+        <a href="/listings" class="btn-cta btn px-4 mt-2">Explore Listings</a>
+      </div>
+
     <% } else { %>
-        <div class="row">
-            <% for(let booking of bookings) { %>
-                <div class="col-md-6 mb-4">
 
-                    <div class="card h-100 shadow-sm">
-                        <img src="<%= booking.listing.image.url %>" class="card-img-top" alt="<%= booking.listing.image.url %>" style="height: 200px; object-fit: cover;">
+      <!-- Booking Cards -->
+      <div class="booking-list">
+        <% for(let booking of bookings){ %>
+          <div class="booking-row-card">
 
-                        <div class="card-body pt-2 p-3">
-                            <h5 class="card-title"><%= booking.listing.title %></h5>
-                            <p class="text-muted mb-2">
-                                📍 <%= booking.listing.location %>, <%= booking.listing.country %>
-                            </p>
+            <!-- Image -->
+            <div class="booking-row-img">
+              <img src="<%= booking.listing.image.url %>" alt="<%= booking.listing.title %>">
+            </div>
 
-                            <div class="mb-2">
-                                <small class="text-muted">
-                                    📅 <%= new Date(booking.checkIn).toDateString() %> 
-                                    → <%= new Date(booking.checkOut).toDateString() %>
-                                </small>
-                            </div>
+            <!-- Details -->
+            <div class="booking-row-details">
+              <div class="booking-row-title">
+                <%= booking.listing.title %> &bull;
+                <span style="color:var(--color-muted); font-weight:400;"><%= booking.listing.location %></span>
+              </div>
+              <div class="booking-row-meta">
+                <%= new Date(booking.checkIn).toDateString() %> &mdash; <%= new Date(booking.checkOut).toDateString() %>
+                &nbsp;&bull;&nbsp; <%= booking.nights %> nights &nbsp;&bull;&nbsp; <%= booking.guests %> guests
+              </div>
+              <div class="booking-row-policy">
+                <% if(booking.listing.cancellationPolicy){ %>
+                  <%= booking.listing.cancellationPolicy %> cancellation policy
+                <% } %>
+              </div>
+            </div>
 
-                            <div class="mb-2">
-                                <small class="text-muted">
-                                    🌙 <%= booking.nights %> nights &nbsp;|&nbsp;
-                                    👥 <%= booking.guests %> guests
-                                </small>
-                            </div>
+            <!-- Right: Total + Status + Actions -->
+            <div class="booking-row-right">
+              <div class="booking-row-total-label">Total</div>
+              <div class="booking-row-total">₹<%= booking.totalPrice.toLocaleString('en-IN') %></div>
 
-                            <p class="fw-bold mb-2">
-                                ₹<%= booking.totalPrice.toLocaleString('en-IN') %>
-                            </p>
+              <% if(booking.status === 'confirmed'){ %>
+                <span class="booking-status-badge confirmed">Confirmed</span>
+              <% } else if(booking.status === 'pending_payment'){ %>
+                <span class="booking-status-badge pending">Pending</span>
+              <% } else if(booking.status === 'cancelled'){ %>
+                <span class="booking-status-badge cancelled">Cancelled</span>
+              <% } else { %>
+                <span class="booking-status-badge completed">Completed</span>
+              <% } %>
 
+              <div class="booking-row-actions">
+                <a href="/bookings/<%= booking._id %>" class="booking-action-btn view">
+                  <i class="fa-solid fa-eye"></i> View
+                </a>
+                <% if(booking.status === 'pending_payment'){ %>
+                  <a href="/bookings/<%= booking._id %>" class="booking-action-btn pay">
+                    <i class="fa-solid fa-credit-card"></i> Pay Now
+                  </a>
+                <% } %>
+                <% if(booking.status !== 'cancelled' && booking.status !== 'completed'){ %>
+                  <form action="/bookings/<%= booking._id %>?_method=DELETE" method="POST" style="display:inline;">
+                    <button class="booking-action-btn cancel" onclick="return confirm('Cancel this booking?')">
+                      <i class="fa-solid fa-xmark"></i> Cancel
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
 
-                            <% if(booking.status === 'confirmed') { %>
-                                <span class="badge bg-success">✅ Confirmed</span>
-                            <% } else if(booking.status === 'pending_payment') { %>
-                                <span class="badge bg-warning text-dark">⏳ Payment Pending</span>
-                            <% } else if(booking.status === 'cancelled') { %>
-                                <span class="badge bg-danger">❌ Cancelled</span>
-                            <% } else { %>
-                                <span class="badge bg-secondary">✔️ Completed</span>
-                            <% } %>
+          </div>
+        <% } %>
+      </div>
 
-                        </div>
-
-                        <div class="card-footer d-flex gap-2">
-                            <a href="/bookings/<%= booking._id %>" class="btn btn-sm btn-success">View Details</a>
-
-                            <% if(booking.status === 'pending_payment'){ %>
-                                <a href="/bookings/<%= booking._id %>/payment" class="btn btn-sm btn-success">Pay Now</a>
-                            <% } %>
-
-                            <% if(booking.status !== 'cancelled' && booking.status !== 'completed'){ %>
-                                <form action="/bookings/<%= booking._id %>?_method=DELETE" method="POST">
-                                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this booking?')">
-                                        Cancel
-                                    </button>
-                                </form>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-            <% } %> 
+      <!-- Cancellation Policy Info -->
+      <div class="cancellation-info-card">
+        <div>
+          <div class="cancellation-info-title">Cancellation Policy</div>
+          <ul class="cancellation-info-list">
+            <li>Flexible: Full refund up to 48 hours before check-in for most listings.</li>
+            <li>Moderate: Full refund up to 24 hours before check-in, minus service fee.</li>
+            <li>Strict: No refunds within 7 days of arrival unless extenuating circumstances.</li>
+          </ul>
         </div>
-    <% } %>    
+        <div class="cancellation-help">
+          <div style="font-size:0.85rem; font-weight:600; margin-bottom:0.5rem;">Need help with a cancellation?</div>
+          <a href="#" class="btn-cta btn px-3" style="font-size:0.85rem;">
+            <i class="fa-solid fa-phone me-1"></i> Contact Support
+          </a>
+        </div>
+      </div>
 
-</div>
+    <% } %>
+  </div><!-- end bookings-main -->
+  </div><!-- end bookings-layout -->
+  </div><!-- end container -->
+</div><!-- end bookings-page -->
+
+<style>
+.bookings-page { background: var(--color-bg); min-height: 80vh; }
+
+.bookings-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+/* Sidebar */
+.bookings-sidebar {
+  width: 220px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 90px;
+}
+.sidebar-user {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.2rem;
+  text-align: center;
+}
+.sidebar-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-nav);
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.6rem;
+}
+.sidebar-username { font-weight: 700; font-size: 0.95rem; color: var(--color-text); }
+.sidebar-role { font-size: 0.75rem; color: var(--color-muted); }
+
+.sidebar-nav {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.sidebar-nav-link:hover { background: var(--color-bg); }
+.sidebar-nav-link.active {
+  background: #f0f4e8;
+  color: var(--color-nav);
+  font-weight: 600;
+}
+.sidebar-nav-link i { width: 16px; color: var(--color-nav); }
+
+.sidebar-footer-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.2rem;
+}
+.sidebar-footer-link { font-size: 0.8rem; color: var(--color-muted); text-decoration: underline; }
+.sidebar-logout-btn {
+  background: var(--color-cta);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.3rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: var(--font-main);
+}
+
+.sidebar-help {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+.sidebar-help-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; }
+.sidebar-help-text { font-size: 0.78rem; color: var(--color-muted); line-height: 1.5; margin-bottom: 0.6rem; }
+.sidebar-help-btn {
+  display: block;
+  background: var(--color-cta);
+  color: white;
+  text-align: center;
+  border-radius: 20px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Main content */
+.bookings-main { flex: 1; min-width: 0; }
+
+.bookings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: var(--color-nav);
+  border-radius: var(--radius);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+}
+.bookings-title { color: white; font-size: 1.5rem; font-weight: 700; margin: 0; }
+.bookings-sub { color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0.2rem 0 0; }
+
+.bookings-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--color-muted);
+}
+
+.booking-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+
+.booking-row-card {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  flex-wrap: wrap;
+}
+.booking-row-img {
+  width: 120px;
+  min-width: 120px;
+  height: 90px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.booking-row-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.booking-row-details { flex: 1; min-width: 200px; }
+.booking-row-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  margin-bottom: 0.3rem;
+}
+.booking-row-meta {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-bottom: 0.2rem;
+}
+.booking-row-policy {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  font-style: italic;
+}
+.booking-row-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  min-width: 140px;
+}
+.booking-row-total-label { font-size: 0.75rem; color: var(--color-muted); }
+.booking-row-total { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
+
+.booking-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  color: white;
+}
+.booking-status-badge.confirmed { background: #27ae60; }
+.booking-status-badge.pending { background: var(--color-cta); }
+.booking-status-badge.cancelled { background: #e74c3c; }
+.booking-status-badge.completed { background: #95a5a6; }
+
+.booking-row-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
+.booking-action-btn {
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-main);
+  transition: opacity 0.2s;
+}
+.booking-action-btn:hover { opacity: 0.85; }
+.booking-action-btn.view { background: #f0e8dc; color: var(--color-text); }
+.booking-action-btn.pay { background: var(--color-cta); color: white; }
+.booking-action-btn.cancel { background: #fde8e8; color: #e74c3c; }
+
+.cancellation-info-card {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.cancellation-info-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.6rem; }
+.cancellation-info-list {
+  padding-left: 1.2rem;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  line-height: 1.8;
+}
+.cancellation-help { text-align: right; min-width: 180px; }
+</style>

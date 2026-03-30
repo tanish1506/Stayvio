@@ -2,14 +2,14 @@ const User = require("../models/user")
 
 
 module.exports.renderSignupForm = (req,res) => {
-    res.render("users/signup.ejs", { searchQuery: '' })
+    res.redirect("/listings");
 }
 
 module.exports.signup = async (req,res) => {
     try{
 
-        let {username,email,password} = req.body;
-        const newUser = new User({email,username});
+        let {username,email,password,role} = req.body;
+        const newUser = new User({email,username , role : role || 'guest'});
         const registeredUser = await User.register(newUser,password);
         req.login(registeredUser,(err)=>{
             if(err){
@@ -21,14 +21,15 @@ module.exports.signup = async (req,res) => {
         
     } catch(e){
          req.flash("error",e.message);
-         res.redirect("/signup");
+         res.redirect("/listings");
     }
     
 }
 
 module.exports.renderLoginForm = (req,res)=>{
-    res.render("users/login.ejs", { searchQuery: '' })
+    res.redirect("/listings");
 }
+
 
 module.exports.login = async (req,res) => {
      req.flash("sucess" ,"Welcome back to Stayvio!")

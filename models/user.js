@@ -7,6 +7,31 @@ const userSchema = new Schema({
         type : String,
         require : true,
     },
+    role : {
+        type : String,
+        enum : ['guest','host','both','admin'],
+        default : 'guest',
+    },
+    avatar : {
+        type : String,
+    },
+    phone : {
+        type : String,
+    },
+    isVerified : {
+        type : Boolean,
+        default : false,
+    },
+    hostSince : {
+        type : Date,
+    },
+    superhost : {
+        type : Boolean,
+        default : false,
+    },
+    responseRate : {
+        type : Number,
+    },
     wishlist : {
         type: [
             {
