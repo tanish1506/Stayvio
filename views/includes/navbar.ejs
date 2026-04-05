@@ -10,22 +10,51 @@
       <div class="navbar-nav me-auto">
         <a class="nav-link" href="/listings">Home</a>
         <a class="nav-link" href="/listings">Explore</a>
-        <% if(currUser){ %>
-          <a class="nav-link" href="/bookings">My Bookings</a>
-          <a class="nav-link" href="/wishlist">Wishlist</a>
-        <% } %>
       </div>
       <div class="d-flex align-items-center gap-2">
         <% if(currUser){ %>
-          <a href="/listings/new" class="btn-list-space">List Your Space</a>
-        <% } else{ %>
-          <button onclick="openAuthModal('login')" class="btn-list-space" style="border: none; cursor: pointer;">List Your Space</button>
-        <% } %>
-        <% if(!currUser){ %>
-          <button onclick="openAuthModal('login')" class="btn-nav-login">Login / Sign Up</button>
+          <% if(currUser.role === 'host' || currUser.role === 'both'){ %>
+            <a href="/listings/new" class="btn-list-space">List Your Space</a>
+          <% } else { %>
+            <a href="/listings/new" class="btn-list-space">List Your Space</a>
+          <% } %>
+          <!-- Wishlist icon -->
+          <a href="/wishlist" class="nav-wishlist-btn" title="Wishlist">
+            <i class="fa-regular fa-heart"></i>
+          </a>
+          <div class="nav-profile-dropdown">
+            <button class="nav-profile-btn" onclick="toggleProfileDropdown()">
+              <div class="nav-avatar"><%= currUser.username.charAt(0).toUpperCase() %></div>
+              <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+            </button>
+            <div class="nav-profile-menu" id="profileDropdown">
+              <a href="/profile" class="nav-profile-menu-item">
+                <i class="fa-regular fa-user"></i>Profile
+              </a>
+              <a href="/bookings" class="nav-profile-menu-item">
+                <i class="fa-regular fa-calendar-check"></i>My Bookings
+              </a>
+              <% if(currUser.role === 'host' || currUser.role === 'both'){ %>
+                <a href="/dashboard" class="nav-profile-menu-item">
+                  <i class="fa-solid fa-chart-line"></i>Dashboard
+                </a>
+              <% } %>
+              <% if(currUser.role === 'admin'){ %>
+                <a href="/admin" class="nav-profile-menu-item">
+                  <i class="fa-solid fa-shield-halved"></i>Admin Panel
+                </a>
+              <% } %>
+              <hr style="margin: 0.3rem 0; border-color: #e0d5c8;">
+              <a href="/logout" class="nav-profile-menu-item" style="color:#e74c3c;">
+                <i class="fa-solid fa-right-from-bracket" style="color:#e74c3c;"></i>Logout
+              </a>
+            </div>
+          </div>
         <% } else { %>
-          <a href="/logout" class="btn-nav-login">Log Out</a>
+          <button onclick="openAuthModal('login')" class="btn-list-space" style="border: none; cursor: pointer;">List Your Space</button>
+          <button onclick="openAuthModal('login')" class="btn-nav-login">Login / Sign Up</button>
         <% } %>
+
       </div>
     </div>
   </div>

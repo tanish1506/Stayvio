@@ -80,3 +80,13 @@ module.exports.isHost = (req,res,next)=>{
         res.redirect("/listings");
     }
 }
+
+module.exports.isAdmin = (req,res,next)=>{
+    if(req.user.role === 'admin'){
+        next();
+    }
+    else{
+        req.flash("error","Access denied. Admins only.");
+        res.redirect("/listings");
+    }
+}

@@ -18,6 +18,33 @@ const userSchema = new Schema({
     phone : {
         type : String,
     },
+    bio : {
+        type : String,
+        default : '',
+    },
+    travelType : {
+        type : String,
+        enum : ['solo','couple','family',''],
+        default : '',
+    },
+    budget : {
+        type : String,
+        enum : ['budget','mid','luxury',''],
+        default : '',
+    },
+    interests : {
+        type : [String],
+        default : [],
+    },
+    preferredDestinations : {
+        type : [String],
+        default : [],
+    },
+    travelFrequency : {
+        type : String,
+        enum : ['rare','occasional','frequent',''],
+        default : '',
+    },
     isVerified : {
         type : Boolean,
         default : false,

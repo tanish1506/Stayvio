@@ -33,7 +33,8 @@ router.route("/:id")
 //edit route
 router.get("/:id/edit",isLoggedIn,isHost,isOwner,wrapAsync(listingController.editListings))
 
-
+//toggle listing availability
+router.post("/:id/toggle-availability",isLoggedIn,isOwner,wrapAsync(listingController.toggleAvailability))
 
 
 

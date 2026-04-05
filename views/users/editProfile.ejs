@@ -1,0 +1,360 @@
+<% layout('/layouts/boilerplate') %>
+
+<div class="container py-5" style="max-width:900px;">
+
+    <!-- Header -->
+    <div class="ep-header">
+        <div class="ep-avatar"><%= profileUser.username.charAt(0).toUpperCase() %></div>
+        <div>
+            <div class="ep-title">Edit Profile</div>
+            <div class="ep-sub">@<%= profileUser.username %> &bull; <%= profileUser.email %></div>
+        </div>
+        <a href="/profile" class="ep-back"><i class="fa-solid fa-arrow-left me-1"></i>Back</a>
+    </div>
+
+    <!-- Completion Bar -->
+    <% 
+        let filled = 0;
+        let total = 6;
+        if(profileUser.phone) filled++;
+        if(profileUser.bio) filled++;
+        if(profileUser.travelType) filled++;
+        if(profileUser.budget) filled++;
+        if(profileUser.interests && profileUser.interests.length > 0) filled++;
+        if(profileUser.travelFrequency) filled++;
+        let pct = Math.round((filled/total)*100);
+    %>
+    <div class="ep-completion-card">
+        <div class="ep-completion-top">
+            <span>Profile Completion</span>
+            <span class="ep-pct"><%= pct %>%</span>
+        </div>
+        <div class="ep-bar-bg">
+            <div class="ep-bar-fill" style="width:<%= pct %>%"></div>
+        </div>
+        <% if(pct < 100){ %>
+            <div class="ep-completion-hint">Fill in your travel preferences to get better recommendations</div>
+        <% } else { %>
+            <div class="ep-completion-hint" style="color:var(--color-nav)">Your profile is complete!</div>
+        <% } %>
+    </div>
+
+    <form action="/profile/edit" method="POST">
+        <div class="ep-grid">
+
+            <!-- LEFT COLUMN -->
+            <div class="ep-col">
+                <!-- Section 1: Basic Info -->
+                <div class="ep-section">
+                    <div class="ep-section-title"><i class="fa-regular fa-user me-2"></i>Basic Info</div>
+                    <div class="ep-field">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone" value="<%= profileUser.phone || '' %>" placeholder="+91 98765 43210" />
+                    </div>
+                    <div class="ep-field">
+                        <label>Bio</label>
+                        <textarea name="bio" rows="3" placeholder="Tell people about yourself..."><%= profileUser.bio || '' %></textarea>
+                    </div>
+                </div>
+
+                <!-- Section 3: Optional -->
+                <div class="ep-section">
+                    <div class="ep-section-title"><i class="fa-solid fa-sliders me-2"></i>More About You</div>
+                    <div class="ep-field">
+                        <label>Travel Frequency</label>
+                        <div class="ep-toggle-group">
+                            <label class="ep-toggle <%= profileUser.travelFrequency === 'rare' ? 'selected' : '' %>">
+                                <input type="radio" name="travelFrequency" value="rare" <%= profileUser.travelFrequency === 'rare' ? 'checked' : '' %>>
+                                🌱 Rare
+                            </label>
+                            <label class="ep-toggle <%= profileUser.travelFrequency === 'occasional' ? 'selected' : '' %>">
+                                <input type="radio" name="travelFrequency" value="occasional" <%= profileUser.travelFrequency === 'occasional' ? 'checked' : '' %>>
+                                ✈️ Occasional
+                            </label>
+                            <label class="ep-toggle <%= profileUser.travelFrequency === 'frequent' ? 'selected' : '' %>">
+                                <input type="radio" name="travelFrequency" value="frequent" <%= profileUser.travelFrequency === 'frequent' ? 'checked' : '' %>>
+                                🔥 Frequent
+                            </label>
+                        </div>
+                    </div>
+                    <div class="ep-field">
+                        <label>Preferred Destinations <span class="ep-hint">comma separated</span></label>
+                        <input type="text" name="preferredDestinations" value="<%= profileUser.preferredDestinations ? profileUser.preferredDestinations.join(', ') : '' %>" placeholder="Goa, Manali, Kerala..." />
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="ep-col">
+                <!-- Section 2: Travel Preferences -->
+                <div class="ep-section">
+                    <div class="ep-section-title"><i class="fa-solid fa-compass me-2"></i>Travel Preferences</div>
+
+                    <div class="ep-field">
+                        <label>Travel Type</label>
+                        <div class="ep-toggle-group">
+                            <label class="ep-toggle <%= profileUser.travelType === 'solo' ? 'selected' : '' %>">
+                                <input type="radio" name="travelType" value="solo" <%= profileUser.travelType === 'solo' ? 'checked' : '' %>>
+                                🎒 Solo
+                            </label>
+                            <label class="ep-toggle <%= profileUser.travelType === 'couple' ? 'selected' : '' %>">
+                                <input type="radio" name="travelType" value="couple" <%= profileUser.travelType === 'couple' ? 'checked' : '' %>>
+                                💑 Couple
+                            </label>
+                            <label class="ep-toggle <%= profileUser.travelType === 'family' ? 'selected' : '' %>">
+                                <input type="radio" name="travelType" value="family" <%= profileUser.travelType === 'family' ? 'checked' : '' %>>
+                                👨‍👩‍👧 Family
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="ep-field">
+                        <label>Budget Range</label>
+                        <div class="ep-toggle-group">
+                            <label class="ep-toggle <%= profileUser.budget === 'budget' ? 'selected' : '' %>">
+                                <input type="radio" name="budget" value="budget" <%= profileUser.budget === 'budget' ? 'checked' : '' %>>
+                                💸 Budget
+                            </label>
+                            <label class="ep-toggle <%= profileUser.budget === 'mid' ? 'selected' : '' %>">
+                                <input type="radio" name="budget" value="mid" <%= profileUser.budget === 'mid' ? 'checked' : '' %>>
+                                💳 Mid
+                            </label>
+                            <label class="ep-toggle <%= profileUser.budget === 'luxury' ? 'selected' : '' %>">
+                                <input type="radio" name="budget" value="luxury" <%= profileUser.budget === 'luxury' ? 'checked' : '' %>>
+                                👑 Luxury
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="ep-field">
+                        <label>Interests</label>
+                        <div class="ep-chips">
+                            <% const allInterests = ['Adventure','Beaches','Mountains','Culture','Nightlife','Wildlife','Food','Heritage'];
+                               const userInterests = profileUser.interests || [];
+                            %>
+                            <% for(let interest of allInterests){ %>
+                                <label class="ep-chip <%= userInterests.includes(interest) ? 'selected' : '' %>">
+                                    <input type="checkbox" name="interests" value="<%= interest %>" <%= userInterests.includes(interest) ? 'checked' : '' %>>
+                                    <%= interest %>
+                                </label>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="ep-actions">
+            <a href="/profile" class="ep-btn-cancel">Cancel</a>
+            <button type="submit" class="ep-btn-save"><i class="fa-solid fa-check me-1"></i>Save Changes</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Header */
+    .ep-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .ep-avatar {
+        width: 56px; height: 56px;
+        border-radius: 50%;
+        background: var(--color-nav);
+        color: white;
+        font-size: 1.4rem;
+        font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .ep-title { font-size: 1.2rem; font-weight: 700; color: var(--color-text); }
+    .ep-sub { font-size: 0.78rem; color: var(--color-muted); }
+    .ep-back {
+        margin-left: auto;
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        text-decoration: none;
+        display: flex; align-items: center;
+    }
+    .ep-back:hover { color: var(--color-text); }
+
+    /* Completion Bar */
+    .ep-completion-card {
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .ep-completion-top {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--color-text);
+        margin-bottom: 0.5rem;
+    }
+    .ep-pct { color: var(--color-nav); }
+    .ep-bar-bg {
+        height: 8px;
+        background: #f0e8dc;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    .ep-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-nav), var(--color-cta));
+        border-radius: 20px;
+        transition: width 0.4s ease;
+    }
+    .ep-completion-hint { font-size: 0.75rem; color: var(--color-muted); }
+
+    /* Grid */
+    .ep-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Section */
+    .ep-section {
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .ep-section-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.6rem;
+        border-bottom: 1px solid #f0e8dc;
+    }
+
+    /* Fields */
+    .ep-field { margin-bottom: 1rem; }
+    .ep-field label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        margin-bottom: 0.4rem;
+    }
+    .ep-hint { font-weight: 400; font-size: 0.72rem; margin-left: 0.3rem; }
+    .ep-field input, .ep-field textarea {
+        width: 100%;
+        padding: 0.6rem 0.9rem;
+        border: 1.5px solid #e0d5c8;
+        border-radius: 8px;
+        font-family: var(--font-main);
+        font-size: 0.85rem;
+        color: var(--color-text);
+        background: var(--color-bg);
+        outline: none;
+        transition: border 0.2s;
+        resize: none;
+    }
+    .ep-field input:focus, .ep-field textarea:focus { border-color: var(--color-nav); }
+
+    /* Toggle buttons */
+    .ep-toggle-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .ep-toggle {
+        border: 1.5px solid #e0d5c8;
+        border-radius: 8px;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--color-text);
+        cursor: pointer;
+        transition: all 0.15s;
+        background: var(--color-bg);
+        font-family: var(--font-main);
+    }
+    .ep-toggle input { display: none; }
+    .ep-toggle:hover { border-color: var(--color-nav); }
+    .ep-toggle.selected {
+        background: var(--color-nav);
+        color: white;
+        border-color: var(--color-nav);
+        font-weight: 600;
+    }
+
+    /* Chips */
+    .ep-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .ep-chip {
+        border: 1.5px solid #e0d5c8;
+        border-radius: 20px;
+        padding: 0.3rem 0.9rem;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--color-text);
+        cursor: pointer;
+        transition: all 0.15s;
+        background: var(--color-bg);
+        font-family: var(--font-main);
+    }
+    .ep-chip input { display: none; }
+    .ep-chip:hover { border-color: var(--color-cta); }
+    .ep-chip.selected {
+        background: var(--color-cta);
+        color: white;
+        border-color: var(--color-cta);
+        font-weight: 600;
+    }
+
+    /* Actions */
+    .ep-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.8rem;
+    }
+    .ep-btn-save {
+        background: var(--color-nav);
+        color: white;
+        border: none;
+        padding: 0.65rem 1.8rem;
+        border-radius: 8px;
+        font-family: var(--font-main);
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .ep-btn-save:hover { opacity: 0.85; }
+    .ep-btn-cancel {
+        background: #f0e8dc;
+        color: var(--color-text);
+        padding: 0.65rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+    .ep-btn-cancel:hover { opacity: 0.75; }
+
+    @media (max-width: 768px) {
+        .ep-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<script>
+    // Toggle selected class on radio buttons and checkboxes
+    document.querySelectorAll('.ep-toggle input, .ep-chip input').forEach(input => {
+        input.addEventListener('change', () => {
+            if(input.type === 'radio') {
+                document.querySelectorAll(`input[name="${input.name}"]`).forEach(r => {
+                    r.closest('label').classList.remove('selected');
+                });
+            }
+            input.closest('label').classList.toggle('selected', input.checked);
+        });
+    });
+</script>

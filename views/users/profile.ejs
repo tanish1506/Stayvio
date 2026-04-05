@@ -1,0 +1,692 @@
+<% layout('/layouts/boilerplate') %>
+
+<div class="profile-page">
+    <div class="container py-4">
+        <!-- Avatar + Info -->
+        <div class="profile-hero-body">
+            <div class="profile-avatar-xl">
+                <%= profileUser.username.charAt(0).toUpperCase() %>
+            </div>
+                <div class="profile-hero-info">
+                    <div class="profile-hero-name">
+                        @<%= profileUser.username %>
+                        <% if(profileUser.isVerified){ %>
+                            <span class="verified-badge"><i class="fa-solid fa-circle-check"></i></span>
+                        <% } %>
+                    </div>
+                    <div class="profile-hero-meta">
+                        <span class="profile-role-badge <%= profileUser.role %>"><%= profileUser.role %></span>
+                        <span class="profile-hero-joined">
+                            <i class="fa-regular fa-calendar me-1"></i>
+                            Member since <%= profileUser.createdAt ? new Date(profileUser.createdAt).getFullYear() : 'recently' %>
+                        </span>
+                    </div>
+                    <% if(profileUser.bio){ %>
+                        <p class="profile-hero-bio">"<%= profileUser.bio %>"</p>
+                    <% } else { %>
+                        <p class="profile-hero-bio muted-bio">No bio yet — <a href="/profile/edit">add one</a></p>
+                    <% } %>
+                </div>
+                <a href="/profile/edit" class="btn-edit-profile">
+                    <i class="fa-solid fa-pen me-1"></i> Edit Profile
+                </a>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="profile-stats-bar">
+                <div class="pstat">
+                    <div class="pstat-value"><%= profileUser.bookings.length %></div>
+                    <div class="pstat-label"><i class="fa-solid fa-suitcase-rolling me-1"></i>Total Trips</div>
+                </div>
+                <div class="pstat-divider"></div>
+                <div class="pstat">
+                    <div class="pstat-value"><%= upcomingJourneys.length %></div>
+                    <div class="pstat-label"><i class="fa-solid fa-plane-departure me-1"></i>Upcoming</div>
+                </div>
+                <div class="pstat-divider"></div>
+                <div class="pstat">
+                    <div class="pstat-value"><%= pastJourneys.length %></div>
+                    <div class="pstat-label"><i class="fa-solid fa-clock-rotate-left me-1"></i>Completed</div>
+                </div>
+                <div class="pstat-divider"></div>
+                <div class="pstat">
+                    <div class="pstat-value"><%= activeWishlist.length %></div>
+                    <div class="pstat-label"><i class="fa-regular fa-heart me-1"></i>Wishlist</div>
+                </div>
+            </div>
+
+        <!-- Main Layout -->
+        <div class="profile-layout">
+
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <div class="profile-info-card">
+                    <div class="pinfo-title">Contact Info</div>
+                    <div class="pinfo-row">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span><%= profileUser.email %></span>
+                    </div>
+                    <div class="pinfo-row">
+                        <i class="fa-solid fa-phone"></i>
+                        <span><%= profileUser.phone || 'Not added yet' %></span>
+                    </div>
+                </div>
+                <div class="profile-links-card">
+                    <a href="/bookings" class="profile-link-item">
+                        <i class="fa-regular fa-calendar-check"></i> My Bookings
+                    </a>
+                    <a href="/wishlist" class="profile-link-item">
+                        <i class="fa-regular fa-heart"></i> Wishlist
+                    </a>
+                    <% if(profileUser.role === 'host' || profileUser.role === 'both'){ %>
+                        <a href="/dashboard" class="profile-link-item">
+                            <i class="fa-solid fa-chart-line"></i> Host Dashboard
+                        </a>
+                    <% } %>
+                    <a href="/profile/edit" class="profile-link-item">
+                        <i class="fa-solid fa-pen"></i> Edit Profile
+                    </a>
+                    <a href="/logout" class="profile-link-item logout">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="profile-main">
+                <div class="profile-tabs">
+                    <button class="profile-tab active" onclick="showProfileTab('details', this)">
+                        <i class="fa-regular fa-user me-1"></i> Profile Details
+                    </button>
+                    <button class="profile-tab" onclick="showProfileTab('upcoming', this)">
+                        <i class="fa-solid fa-plane-departure me-1"></i> Upcoming Journeys
+                        <span class="profile-tab-count"><%= upcomingJourneys.length %></span>
+                    </button>
+                    <button class="profile-tab" onclick="showProfileTab('past', this)">
+                        <i class="fa-solid fa-clock-rotate-left me-1"></i> Past Journeys
+                        <span class="profile-tab-count"><%= pastJourneys.length %></span>
+                    </button>
+                </div>
+
+                <!-- Upcoming Journeys -->
+                <div id="tab-upcoming" class="profile-tab-content">
+                    <% if(upcomingJourneys.length === 0){ %>
+                        <div class="profile-empty">
+                            <i class="fa-solid fa-plane fa-2x mb-3"></i>
+                            <h5>No upcoming trips</h5>
+                            <p>Start exploring and book your next adventure!</p>
+                            <a href="/listings" class="btn btn-cta px-4 mt-2">Explore Stays</a>
+                        </div>
+                    <% } else { %>
+                        <% for(let booking of upcomingJourneys){ %>
+                            <% if(booking.listing){ %>
+                                <div class="profile-journey-card">
+                                    <img src="<%= booking.listing.image ? booking.listing.image.url : '' %>"
+                                        alt="<%= booking.listing.title %>" class="profile-journey-img">
+                                    <div class="profile-journey-info">
+                                        <div class="profile-journey-title"><%= booking.listing.title %></div>
+                                        <div class="profile-journey-location">
+                                            <i class="fa-solid fa-location-dot me-1"></i>
+                                            <%= booking.listing.location %>, <%= booking.listing.country %>
+                                        </div>
+                                        <div class="profile-journey-dates">
+                                            📅 <%= new Date(booking.checkIn).toDateString() %> → <%= new Date(booking.checkOut).toDateString() %>
+                                            &nbsp;&bull;&nbsp; <%= booking.nights %> nights
+                                        </div>
+                                        <div class="profile-journey-price">₹<%= booking.totalPrice.toLocaleString('en-IN') %></div>
+                                    </div>
+                                    <div class="profile-journey-right">
+                                        <% if(booking.status === 'confirmed'){ %>
+                                            <span class="profile-status confirmed">Confirmed</span>
+                                        <% } else if(booking.status === 'pending_payment'){ %>
+                                            <span class="profile-status pending">Pay Now</span>
+                                        <% } else if(booking.status === 'pending_approval'){ %>
+                                            <span class="profile-status approval">Awaiting Approval</span>
+                                        <% } %>
+                                        <a href="/bookings/<%= booking._id %>" class="profile-view-btn">View Details</a>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <!-- Past Journeys -->
+                <div id="tab-past" class="profile-tab-content">
+                    <% if(pastJourneys.length === 0){ %>
+                        <div class="profile-empty">
+                            <i class="fa-solid fa-clock-rotate-left fa-2x mb-3"></i>
+                            <h5>No past trips yet</h5>
+                            <p>Your completed journeys will appear here.</p>
+                        </div>
+                    <% } else { %>
+                        <% for(let booking of pastJourneys){ %>
+                            <% if(booking.listing){ %>
+                                <div class="profile-journey-card">
+                                    <img src="<%= booking.listing.image ? booking.listing.image.url : '' %>"
+                                        alt="<%= booking.listing.title %>" class="profile-journey-img">
+                                    <div class="profile-journey-info">
+                                        <div class="profile-journey-title"><%= booking.listing.title %></div>
+                                        <div class="profile-journey-location">
+                                            <i class="fa-solid fa-location-dot me-1"></i>
+                                            <%= booking.listing.location %>, <%= booking.listing.country %>
+                                        </div>
+                                        <div class="profile-journey-dates">
+                                            📅 <%= new Date(booking.checkIn).toDateString() %> → <%= new Date(booking.checkOut).toDateString() %>
+                                            &nbsp;&bull;&nbsp; <%= booking.nights %> nights
+                                        </div>
+                                        <div class="profile-journey-price">₹<%= booking.totalPrice.toLocaleString('en-IN') %></div>
+                                    </div>
+                                    <div class="profile-journey-right">
+                                        <span class="profile-status completed">Completed</span>
+                                        <a href="/listings/<%= booking.listing._id %>#review" class="profile-view-btn">Leave Review</a>
+                                        <a href="/bookings/<%= booking._id %>" class="profile-view-btn ghost-btn">View</a>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <!-- Profile Details -->
+                <div id="tab-details" class="profile-tab-content active-tab">
+                    <div class="profile-details-card">
+                        <div class="profile-details-header">
+                            <div class="profile-section-title">Personal Information</div>
+                            <a href="/profile/edit" class="btn-edit-inline">
+                                <i class="fa-solid fa-pen me-1"></i> Edit
+                            </a>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Username</span>
+                            <span class="profile-detail-value">@<%= profileUser.username %></span>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Email</span>
+                            <span class="profile-detail-value"><%= profileUser.email %></span>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Phone</span>
+                            <span class="profile-detail-value <%= !profileUser.phone ? 'muted-val' : '' %>">
+                                <%= profileUser.phone || 'Not added yet' %>
+                            </span>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Bio</span>
+                            <span class="profile-detail-value <%= !profileUser.bio ? 'muted-val' : '' %>">
+                                <%= profileUser.bio || 'Not added yet' %>
+                            </span>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Role</span>
+                            <span class="profile-detail-value">
+                                <span class="profile-role-badge <%= profileUser.role %>"><%= profileUser.role %></span>
+                            </span>
+                        </div>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Member Since</span>
+                            <span class="profile-detail-value">
+                                <%= profileUser.createdAt ? new Date(profileUser.createdAt).toDateString() : 'N/A' %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Travel Preferences Section -->
+                    <% if(profileUser.travelType || profileUser.budget || (profileUser.interests && profileUser.interests.length > 0) || profileUser.travelFrequency){ %>
+                    <div class="profile-details-card mt-3">
+                        <div class="profile-details-header">
+                            <div class="profile-section-title">✈️ Travel Preferences</div>
+                            <a href="/profile/edit" class="btn-edit-inline"><i class="fa-solid fa-pen me-1"></i>Edit</a>
+                        </div>
+
+                        <% 
+                            // Travel Style auto-generate logic
+                            let travelStyle = null;
+                            let travelStyleEmoji = '';
+                            const i = profileUser.interests || [];
+                            if(profileUser.travelType === 'solo' && i.includes('Adventure')) { travelStyle = 'Solo Adventurer'; travelStyleEmoji = '🎒'; }
+                            else if(i.includes('Beaches') && profileUser.budget === 'budget') { travelStyle = 'Budget Beach Explorer'; travelStyleEmoji = '🌴'; }
+                            else if(i.includes('Mountains')) { travelStyle = 'Mountain Seeker'; travelStyleEmoji = '🏔️'; }
+                            else if(i.includes('Culture') || i.includes('Heritage')) { travelStyle = 'Culture Enthusiast'; travelStyleEmoji = '🏛️'; }
+                            else if(profileUser.budget === 'luxury') { travelStyle = 'Luxury Traveler'; travelStyleEmoji = '👑'; }
+                            else if(profileUser.travelFrequency === 'frequent') { travelStyle = 'Frequent Explorer'; travelStyleEmoji = '🔥'; }
+                            else if(profileUser.travelType === 'family') { travelStyle = 'Family Traveler'; travelStyleEmoji = '👨‍👩‍👧'; }
+                            else if(profileUser.travelType === 'couple') { travelStyle = 'Romantic Wanderer'; travelStyleEmoji = '💑'; }
+                        %>
+
+                        <% if(travelStyle){ %>
+                            <div class="travel-style-badge">
+                                <span class="ts-emoji"><%= travelStyleEmoji %></span>
+                                <div>
+                                    <div class="ts-label">Your Travel Style</div>
+                                    <div class="ts-value"><%= travelStyle %></div>
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <% if(profileUser.travelType){ %>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Travel Type</span>
+                            <span class="pref-tag"><%= profileUser.travelType %></span>
+                        </div>
+                        <% } %>
+                        <% if(profileUser.budget){ %>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Budget</span>
+                            <span class="pref-tag"><%= profileUser.budget === 'budget' ? '💸 Budget' : profileUser.budget === 'mid' ? '💳 Mid' : '👑 Luxury' %></span>
+                        </div>
+                        <% } %>
+                        <% if(profileUser.travelFrequency){ %>
+                        <div class="profile-detail-row">
+                            <span class="profile-detail-label">Travel Frequency</span>
+                            <span class="pref-tag"><%= profileUser.travelFrequency %></span>
+                        </div>
+                        <% } %>
+                        <% if(profileUser.interests && profileUser.interests.length > 0){ %>
+                        <div class="profile-detail-row" style="align-items:flex-start; padding: 0.8rem 0;">
+                            <span class="profile-detail-label">Interests</span>
+                            <div class="pref-chips">
+                                <% for(let interest of profileUser.interests){ %>
+                                    <span class="pref-chip"><%= interest %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% } %>
+                        <% if(profileUser.preferredDestinations && profileUser.preferredDestinations.length > 0){ %>
+                        <div class="profile-detail-row" style="align-items:flex-start; padding: 0.8rem 0;">
+                            <span class="profile-detail-label">Destinations</span>
+                            <div class="pref-chips">
+                                <% for(let dest of profileUser.preferredDestinations){ %>
+                                    <span class="pref-chip dest"><%= dest %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                    <% } else { %>
+                    <div class="profile-prefs-empty">
+                        <i class="fa-solid fa-compass me-2"></i>
+                        No travel preferences set yet.
+                        <a href="/profile/edit">Add them</a> to get better recommendations.
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function showProfileTab(tab, btn) {
+        document.querySelectorAll('.profile-tab-content').forEach(t => t.classList.remove('active-tab'));
+        document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active-tab');
+        btn.classList.add('active');
+    }
+</script>
+
+<style>
+    .profile-page { background: var(--color-bg); min-height: 80vh; overflow-x: hidden; }
+    .profile-page .container { max-width: 1440px; }
+
+    .profile-cover {
+        height: 200px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+    }
+    .profile-cover-blur {
+        position: absolute;
+        inset: -20px;
+        background: url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&auto=format&fit=crop&q=80') center/cover no-repeat;
+        filter: blur(8px);
+        transform: scale(1.1);
+    }
+    .profile-cover-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(44, 36, 22, 0.45);
+    }
+    .profile-cover::before { display: none; }
+
+    .profile-hero-body {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        padding: 1.5rem 0 1.2rem;
+        flex-wrap: wrap;
+    }
+
+    .profile-avatar-xl {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: var(--color-nav);
+        color: white;
+        font-size: 2.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(44,36,22,0.15);
+        flex-shrink: 0;
+    }
+
+    .profile-hero-info { flex: 1; padding-top: 0.5rem; min-width: 0; }
+
+    .profile-hero-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--color-text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .verified-badge { color: #3498db; font-size: 0.95rem; }
+
+    .profile-hero-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0.3rem 0;
+        flex-wrap: wrap;
+    }
+    .profile-hero-joined { font-size: 0.78rem; color: var(--color-muted); }
+
+    .profile-hero-bio {
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        font-style: italic;
+        margin: 0.2rem 0 0;
+    }
+    .muted-bio a { color: var(--color-cta); text-decoration: none; }
+    .muted-bio a:hover { text-decoration: underline; }
+
+    .btn-edit-profile {
+        background: var(--color-nav);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 8px;
+        font-family: var(--font-main);
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity 0.2s;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        margin-bottom: 0.3rem;
+    }
+    .btn-edit-profile:hover { opacity: 0.85; color: white; }
+
+    /* Stats Bar */
+    .profile-stats-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .pstat { text-align: center; padding: 0.3rem 1rem; }
+    .pstat-value { font-size: 1.4rem; font-weight: 700; color: var(--color-text); }
+    .pstat-label { font-size: 0.72rem; color: var(--color-muted); margin-top: 0.1rem; }
+    .pstat-divider { width: 1px; height: 36px; background: #e0d5c8; }
+
+    /* Layout */
+    .profile-layout { display: flex; gap: 1.5rem; align-items: flex-start; padding-bottom: 3rem; }
+
+    /* Sidebar */
+    .profile-sidebar {
+        width: 230px;
+        min-width: 230px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        position: sticky;
+        top: 90px;
+    }
+    .profile-info-card {
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1.2rem;
+    }
+    .pinfo-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-muted);
+        margin-bottom: 0.8rem;
+    }
+    .pinfo-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        font-size: 0.8rem;
+        color: var(--color-text);
+        margin-bottom: 0.6rem;
+        word-break: break-all;
+    }
+    .pinfo-row i { color: var(--color-nav); width: 14px; flex-shrink: 0; margin-top: 2px; }
+
+    .profile-links-card {
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 0.8rem;
+    }
+    .profile-link-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.6rem 0.8rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: var(--color-text);
+        text-decoration: none;
+        transition: background 0.15s;
+    }
+    .profile-link-item:hover { background: var(--color-bg); }
+    .profile-link-item i { color: var(--color-nav); width: 16px; }
+    .profile-link-item.logout { color: #e74c3c; }
+    .profile-link-item.logout i { color: #e74c3c; }
+
+    /* Role badges */
+    .profile-role-badge {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.2rem 0.7rem;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    .profile-role-badge.guest { background: #f0e8dc; color: var(--color-muted); }
+    .profile-role-badge.host { background: #f0f4e8; color: var(--color-nav); }
+    .profile-role-badge.both { background: #fef3e8; color: var(--color-cta); }
+    .profile-role-badge.admin { background: #fde8e8; color: #e74c3c; }
+
+    /* Main */
+    .profile-main { flex: 1; min-width: 0; }
+
+    .profile-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .profile-tab {
+        background: var(--color-white);
+        border: 1.5px solid #e0d5c8;
+        border-radius: 8px;
+        padding: 0.5rem 1.1rem;
+        font-size: 0.83rem;
+        font-weight: 500;
+        color: var(--color-muted);
+        cursor: pointer;
+        font-family: var(--font-main);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .profile-tab.active { background: var(--color-nav); color: white; border-color: var(--color-nav); font-weight: 600; }
+    .profile-tab-count {
+        border-radius: 20px;
+        padding: 0.1rem 0.45rem;
+        font-size: 0.7rem;
+        background: #f0e8dc;
+        color: var(--color-muted);
+    }
+    .profile-tab.active .profile-tab-count { background: rgba(255,255,255,0.3); color: white; }
+    .profile-tab-content { display: none; }
+    .profile-tab-content.active-tab { display: block; }
+
+    /* Empty state */
+    .profile-empty {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--color-muted);
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+    .profile-empty i { color: var(--color-muted); }
+
+    /* Journey Cards */
+    .profile-journey-card {
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.2rem;
+        margin-bottom: 0.8rem;
+        transition: transform 0.2s;
+    }
+    .profile-journey-card:hover { transform: translateY(-2px); }
+    .profile-journey-img { width: 95px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+    .profile-journey-info { flex: 1; min-width: 0; }
+    .profile-journey-title { font-weight: 600; font-size: 0.9rem; color: var(--color-text); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-journey-location { font-size: 0.76rem; color: var(--color-muted); margin-bottom: 0.2rem; }
+    .profile-journey-location i { color: var(--color-cta); font-size: 0.72rem; }
+    .profile-journey-dates { font-size: 0.74rem; color: var(--color-muted); margin-bottom: 0.3rem; }
+    .profile-journey-price { font-weight: 700; font-size: 0.88rem; color: var(--color-cta); }
+    .profile-journey-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; flex-shrink: 0; }
+
+    .profile-status { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 20px; color: white; }
+    .profile-status.confirmed { background: #27ae60; }
+    .profile-status.pending { background: var(--color-cta); }
+    .profile-status.approval { background: #8e44ad; }
+    .profile-status.completed { background: #95a5a6; }
+
+    .profile-view-btn {
+        font-size: 0.76rem;
+        font-weight: 500;
+        padding: 0.28rem 0.75rem;
+        border-radius: 8px;
+        background: var(--color-cta);
+        color: white;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+    .profile-view-btn:hover { opacity: 0.85; color: white; }
+    .ghost-btn { background: #f0e8dc !important; color: var(--color-text) !important; }
+    .ghost-btn:hover { color: var(--color-text) !important; }
+
+    /* Details card */
+    .profile-details-card {
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+    }
+    .profile-details-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #f0e8dc;
+    }
+    .profile-section-title { font-weight: 700; font-size: 0.95rem; color: var(--color-text); }
+    .btn-edit-inline {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--color-nav);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+    .btn-edit-inline:hover { color: var(--color-cta); }
+    .profile-detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.65rem 0;
+        border-bottom: 1px solid #f8f3ed;
+    }
+    .profile-detail-row:last-child { border-bottom: none; }
+    .profile-detail-label { font-size: 0.82rem; color: var(--color-muted); font-weight: 500; }
+    .profile-detail-value { font-size: 0.85rem; color: var(--color-text); font-weight: 600; text-align: right; max-width: 60%; }
+    .muted-val { color: var(--color-muted) !important; font-weight: 400 !important; font-style: italic; }
+
+    /* Travel preferences */
+    .travel-style-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        background: linear-gradient(135deg, #f0f4e8, #fef3e8);
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.8rem;
+        border: 1px solid #e0d5c8;
+    }
+    .ts-emoji { font-size: 1.8rem; }
+    .ts-label { font-size: 0.7rem; color: var(--color-muted); font-weight: 500; }
+    .ts-value { font-size: 0.95rem; font-weight: 700; color: var(--color-text); }
+    .pref-tag {
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: #f0e8dc;
+        color: var(--color-text);
+        padding: 0.2rem 0.7rem;
+        border-radius: 20px;
+        text-transform: capitalize;
+    }
+    .pref-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: flex-end; }
+    .pref-chip {
+        font-size: 0.75rem;
+        font-weight: 500;
+        background: var(--color-nav);
+        color: white;
+        padding: 0.2rem 0.7rem;
+        border-radius: 20px;
+    }
+    .pref-chip.dest { background: var(--color-cta); }
+    .profile-prefs-empty {
+        background: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1rem 1.5rem;
+        font-size: 0.85rem;
+        color: var(--color-muted);
+        margin-top: 0.8rem;
+    }
+    .profile-prefs-empty a { color: var(--color-cta); }
+    .mt-3 { margin-top: 1rem; }
+
+    @media (max-width: 768px) {
+        .profile-layout { flex-direction: column; }
+        .profile-sidebar { width: 100%; position: static; }
+        .profile-hero-body { margin-top: -35px; }
+        .profile-avatar-xl { width: 75px; height: 75px; font-size: 1.8rem; }
+        .pstat-divider { display: none; }
+        .profile-stats-bar { justify-content: space-around; }
+        .profile-journey-card { flex-wrap: wrap; }
+        .profile-journey-img { width: 100%; height: 160px; }
+    }
+</style>

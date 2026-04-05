@@ -73,11 +73,18 @@
 
             <!-- Image -->
             <div class="booking-row-img">
-              <img src="<%= booking.listing.image.url %>" alt="<%= booking.listing.title %>">
+              <% if(booking.listing && booking.listing.image){ %>
+                <img src="<%= booking.listing.image.url %>" alt="<%= booking.listing.title %>">
+              <% } else { %>
+                <div class="booking-row-img" style="background: var(--color-bg); display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-house" style="color: var(--color-muted);"></i>
+                </div>
+              <% } %>
             </div>
 
             <!-- Details -->
             <div class="booking-row-details">
+              <% if(booking.listing){ %>
               <div class="booking-row-title">
                 <%= booking.listing.title %> &bull;
                 <span style="color:var(--color-muted); font-weight:400;"><%= booking.listing.location %></span>
@@ -91,14 +98,20 @@
                   <%= booking.listing.cancellationPolicy %> cancellation policy
                 <% } %>
               </div>
+              <% } else { %>
+                <div class="booking-row-title" style="color:var(--color-muted);">Listing no longer available</div>
+              <% } %>
             </div>
+
 
             <!-- Right: Total + Status + Actions -->
             <div class="booking-row-right">
               <div class="booking-row-total-label">Total</div>
               <div class="booking-row-total">₹<%= booking.totalPrice.toLocaleString('en-IN') %></div>
 
-              <% if(booking.status === 'confirmed'){ %>
+              <% if(booking.status === 'pending_approval'){ %>
+                <span class="booking-status-badge" style="background: #8e44ad;">Awaiting Approval from Host</span>
+              <% } else if(booking.status === 'confirmed'){ %>
                 <span class="booking-status-badge confirmed">Confirmed</span>
               <% } else if(booking.status === 'pending_payment'){ %>
                 <span class="booking-status-badge pending">Pending</span>

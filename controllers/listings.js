@@ -148,3 +148,11 @@ module.exports.destroyListings = async (req,res)=>{
     req.flash("sucess","Listing Deleted!!")
     res.redirect("/listings")
 }
+
+module.exports.toggleAvailability = async(req,res) => {
+    const listing = await Listing.findById(req.params.id);;
+    listing.isAvailable  = !listing.isAvailable;
+    await listing.save();
+    req.flash("sucess",`Listing marked as ${listing.isAvailable ? 'Available' : 'Unavailable'}`);
+    res.redirect('/dashboard');
+}

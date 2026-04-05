@@ -18,10 +18,20 @@ main()
 async function main() {
     await mongoose.connect(Mongo_url)
 }
+const owners = [
+    "69c98cb31efc7d433aa5c3af",
+    "69cac8f22f358b6b8d318969",
+    "69cac90d2f358b6b8d318b01",
+    "69cac9292f358b6b8d318c99",
+    "69cac9502f358b6b8d318e31",
+]
 
 const initDB = async () =>{
     await Listing.deleteMany({});
-    initdata.data = initdata.data.map((obj) => ({...obj , owner : "69c98cb31efc7d433aa5c3af"}))
+    initdata.data = initdata.data.map((obj,index) => ({
+        ...obj , 
+        owner : owners[index % owners.length]
+    }));
     await Listing.insertMany(initdata.data)
     console.log("Data initialized");
 }

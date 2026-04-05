@@ -27,8 +27,15 @@ function switchTab(tab) {
     loginToggle.classList.remove('active');
   }
 }
-// <% if(typeof showAuthModal !== 'undefined' && showAuthModal){ %>
-//   document.addEventListener('DOMContentLoaded', function() {
-//     openAuthModal('<%= authTab || "login" %>');
-//   });
-// <% } %>
+function toggleProfileDropdown(){
+  const menu = document.getElementById('profileDropdown')
+  menu.classList.toggle('open');
+}
+
+document.addEventListener('click',function(e){
+  const dropdown = document.querySelector(".nav-profile-dropdown");
+  if(dropdown && !dropdown.contains(e.target)){
+    const menu = document.getElementById('profileDropdown');
+    if(menu) menu.classList.remove('open');
+  }
+});

@@ -66,7 +66,7 @@ module.exports.createBooking = async (req,res) => {
         guests: guests,
         nights : nights,
         totalPrice : totalPrice,
-        status : 'pending_payment',
+        status : 'pending_approval',
         paymentStatus : 'pending'
     });
 
@@ -129,4 +129,47 @@ module.exports.cancelBooking = async(req,res) => {
     await booking.save();
     req.flash("sucess","Booking cancelled successfully");
     res.redirect("/bookings");
+}
+
+module.exports.approveBooking = async (req,res) => {
+    const {id} = req.params;
+    const booking = await Booking.findById(id).populate('listing');
+
+    if(!booking){
+        req.flash("error","Booking not found");
+        return res.redirect("/dashboard")
+    }
+
+    // checkin listing's owner 
+    if(!booking.listing.owner.equals(req.user._id)){
+        req.flash("error","You don't have permission to approve this booking");
+        return res.redirect("/dashboard");
+    }
+
+    booking.status = 'pending_payment';
+    await booking.save();
+
+    req.flash("sucess","Booking approved! Guest can now make payment");
+    res.redirect("/dashboard");
+}
+
+module.exports.rejectBooking = async(req,res)=>{
+    const {id} = req.params;
+    const booking = await Booking.findById(id).populate('listing');
+
+    if(!booking){
+        req.flash("error","Booking not found");
+        res.redirect("/dashboard");
+    }
+
+    if(!booking.listing.owner.equals(req.user._id)){
+        req.flash("error","you don't have permission to reject this booking");
+        res.redirect("/dashboard");
+    }
+
+    booking.status = 'cancelled';
+    await booking.save();
+
+    req.flash("sucess","Booking rejected.");
+    res.redirect("/dashboard");
 }

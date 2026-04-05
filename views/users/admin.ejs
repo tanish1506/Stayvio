@@ -1,0 +1,302 @@
+<% layout('/layouts/boilerplate') %>
+
+  <div class="admin-page">
+    <div class="container py-4">
+
+      <!-- Header -->
+      <div class="admin-header">
+        <div>
+          <h2 class="admin-title">
+            <i class="fa-solid fa-shield-halved me-2" style="color:var(--color-cta);"></i>
+            Admin Dashboard
+          </h2>
+          <p class="admin-sub">Full platform overview — Stayvio</p>
+        </div>
+        <div class="admin-header-badges">
+          <span class="admin-role-badge">Admin</span>
+          <span style="font-size:0.82rem; color:var(--color-muted);">@<%= currUser.username %></span>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background:#f0f4e8;">
+            <i class="fa-solid fa-users" style="color:var(--color-nav);"></i>
+          </div>
+          <div>
+            <div class="admin-stat-value">
+              <%= users.length %>
+            </div>
+            <div class="admin-stat-label">Total Users</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background:#fef3e8;">
+            <i class="fa-solid fa-house" style="color:var(--color-cta);"></i>
+          </div>
+          <div>
+            <div class="admin-stat-value">
+              <%= listings.length %>
+            </div>
+            <div class="admin-stat-label">Total Listings</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background:#e8f4e8;">
+            <i class="fa-solid fa-indian-rupee-sign" style="color:#27ae60;"></i>
+          </div>
+          <div>
+            <div class="admin-stat-value">₹<%= totalRevenue.toLocaleString('en-IN') %>
+            </div>
+            <div class="admin-stat-label">Platform Revenue</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background:#f0e8f8;">
+            <i class="fa-solid fa-calendar-check" style="color:#8e44ad;"></i>
+          </div>
+          <div>
+            <div class="admin-stat-value">
+              <%= bookings.length %>
+            </div>
+            <div class="admin-stat-label">Total Bookings</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background:#e8f0f8;">
+            <i class="fa-solid fa-user-tie" style="color:#2980b9;"></i>
+          </div>
+          <div>
+            <div class="admin-stat-value">
+              <%= totalHosts %>
+            </div>
+            <div class="admin-stat-label">Total Hosts</div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+      <!-- Analytics section -->
+      <div class="admin-charts-grid">
+        <div class="admin-chart-card">
+          <div class="admin-chart-title">Bookings by Status</div>
+          <div class="chart-wrap">
+            <canvas id="bookingChart"></canvas>
+          </div>
+        </div>
+        <div class="admin-chart-card">
+          <div class="admin-chart-title">Users by Role</div>
+          <div class="chart-wrap">
+            <canvas id="userChart"></canvas>
+          </div>
+        </div>
+        <div class="admin-chart-card" style="grid-column:span 2;">
+          <div class="admin-chart-title">Monthly Revenue (Last 6 Months)</div>
+          <div class="chart-wrap" style="height:200px;">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Tabs -->
+      <div class="admin-tabs">
+        <div class="admin-tabs-left">
+          <button class="admin-tab active" onclick="showTab('listings')">
+            <i class="fa-solid fa-house me-1"></i> Listings (<%= listings.length %>)
+          </button>
+          <button class="admin-tab" onclick="showTab('users')">
+            <i class="fa-solid fa-users me-1"></i> Users (<%= users.length %>)
+          </button>
+          <button class="admin-tab" onclick="showTab('bookings')">
+            <i class="fa-solid fa-calendar me-1"></i> Bookings (<%= bookings.length %>)
+          </button>
+        </div>
+        <input type="text" id="activeSearch" onkeyup="filterActiveTab()" placeholder="Search..."
+          class="admin-search-input">
+      </div>
+
+      <!-- LISTINGS TAB -->
+      <div id="tab-listings" class="admin-tab-content active-tab">
+        <div class="admin-table-card">
+          <% for(let listing of listings){ %>
+            <div class="admin-row">
+              <img src="<%= listing.image.url %>" class="admin-row-img" alt="">
+              <div class="admin-row-info">
+                <div class="admin-row-title">
+                  <%= listing.title %>
+                </div>
+                <div class="admin-row-meta">
+                  <i class="fa-solid fa-location-dot me-1" style="color:var(--color-cta);font-size:0.72rem;"></i>
+                  <%= listing.location %>, <%= listing.country %>
+                      &nbsp;&bull;&nbsp; ₹<%= listing.price.toLocaleString('en-IN') %>/night
+                        &nbsp;&bull;&nbsp; Owner: @<%= listing.owner ? listing.owner.username : 'N/A' %>
+                </div>
+              </div>
+              <div class="admin-row-actions">
+                <a href="/listings/<%= listing._id %>" class="admin-action-btn view">View</a>
+                <a href="/listings/<%= listing._id %>/edit" class="admin-action-btn edit">Edit</a>
+                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="display:inline;">
+                  <button class="admin-action-btn delete"
+                    onclick="return confirm('Delete this listing?')">Delete</button>
+                </form>
+              </div>
+            </div>
+            <% } %>
+        </div>
+      </div>
+
+      <!-- USERS TAB -->
+      <div id="tab-users" class="admin-tab-content">
+        <div class="admin-table-card">
+          <% for(let user of users){ %>
+            <div class="admin-row">
+              <div class="admin-user-avatar">
+                <%= user.username.charAt(0).toUpperCase() %>
+              </div>
+              <div class="admin-row-info">
+                <div class="admin-row-title">@<%= user.username %>
+                </div>
+                <div class="admin-row-meta">
+                  <%= user.email %>
+                    &nbsp;&bull;&nbsp;
+                    <span class="admin-role-tag <%= user.role %>">
+                      <%= user.role %>
+                    </span>
+                </div>
+              </div>
+              <div class="admin-row-actions">
+                <span style="font-size: 0.78rem; color: var(--color-muted);">
+                  Joined: <%= user.createdAt ? new Date(user.createdAt).toDateString() : 'N/A' %>
+                </span>
+
+                <% if(user.role !=='admin' ){ %>
+                  <form action="/admin/users/<%= user._id %>?_method=DELETE" method="post" style="display: inline;">
+                    <button class="admin-action-btn delete"
+                      onclick="return confirm('Delete @<%= user.username %> ? This cannot be undone.')">Delete</button>
+                  </form>
+                  <% } %>
+              </div>
+            </div>
+            <% } %>
+        </div>
+      </div>
+
+      <!-- BOOKINGS TAB -->
+      <div id="tab-bookings" class="admin-tab-content">
+        <div class="admin-table-card">
+          <% for(let booking of bookings){ %>
+            <div class="admin-row">
+              <div class="admin-row-info">
+                <div class="admin-row-title">
+                  <%= booking.listing ? booking.listing.title.substring(0,30) : 'N/A' %>
+                </div>
+                <div class="admin-row-meta">
+                  Guest: @<%= booking.user ? booking.user.username : 'N/A' %>
+                    &nbsp;&bull;&nbsp;
+                    <%= new Date(booking.checkIn).toDateString() %> → <%= new Date(booking.checkOut).toDateString() %>
+                        &nbsp;&bull;&nbsp; <%= booking.nights %> nights
+                </div>
+              </div>
+              <div style="text-align:right; flex-shrink:0;">
+                <div style="font-weight:700; font-size:0.9rem; color:var(--color-text);">₹<%=
+                    booking.totalPrice.toLocaleString('en-IN') %>
+                </div>
+                <% if(booking.status==='confirmed' ){ %>
+                  <span class="admin-booking-badge confirmed">Confirmed</span>
+                  <% } else if(booking.status==='pending_payment' ){ %>
+                    <span class="admin-booking-badge pending">Pending</span>
+                    <% } else if(booking.status==='cancelled' ){ %>
+                      <span class="admin-booking-badge cancelled">Cancelled</span>
+                      <% } else { %>
+                        <span class="admin-booking-badge completed">Completed</span>
+                        <% } %>
+              </div>
+            </div>
+            <% } %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function showTab(tab) {
+      document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active-tab'));
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active-tab');
+      event.target.classList.add('active');
+      document.getElementById('activeSearch').value = '';
+      filterActiveTab();
+    }
+
+    function filterActiveTab() {
+      const query = document.getElementById('activeSearch').value.toLowerCase();
+      const activeTab = document.querySelector('.admin-tab-content.active-tab');
+      activeTab.querySelectorAll('.admin-row').forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
+      });
+    }
+
+    function filterRows(inputId, tabId) {
+      const query = document.getElementById(inputId).value.toLowerCase();
+      const rows = document.querySelectorAll(`#${tabId} .admin-row`);
+      rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
+      });
+    }
+
+    // Chart JS 
+    const bookingStats = <%- JSON.stringify(bookingStats) %>;
+    const userStats = <%- JSON.stringify(userStats) %>;
+    const monthlyRevenue = <%- JSON.stringify(monthlyRevenue) %>;
+    const monthLabels = <%- JSON.stringify(monthLabels) %>;
+
+    //bookings doughnut chart
+    new Chart(document.getElementById('bookingChart'),{
+      type : 'doughnut',
+      data : {
+        labels : ['Confirmed','Pending','Cancelled','Completed'],
+        datasets : [{
+          data : [bookingStats.confirmed,bookingStats.pending,bookingStats.cancelled,bookingStats.completed],
+          backgroundColor : ['#27ae60', '#E07B39', '#e74c3c', '#95a5a6']
+        }]
+      },
+      options : { maintainAspectRatio: false, plugins : {legend : {position : 'bottom' }}}
+    });
+
+    //users pie chart 
+    new Chart(document.getElementById('userChart'),{
+      type : 'pie',
+      data : {
+        labels : ['Guest','Host','Both','Admin'],
+        datasets : [{
+          data : [userStats.guest,userStats.host,userStats.both,userStats.admin],
+          backgroundColor : ['#f0e8dc', '#708238', '#E07B39', '#e74c3c']
+        }]
+      },
+      options : { maintainAspectRatio: false, plugins : {legend : {position : 'bottom'}}}
+    });
+
+    //revenue bar chart
+    new Chart(document.getElementById('revenueChart'),{
+      type : 'bar',
+      data : {
+        labels : monthLabels,
+        datasets : [{
+          label : 'Revenue (₹)',
+          data : monthlyRevenue,
+          backgroundColor : '#708238',
+          borderRadius : 6
+        }]
+      },
+      options : {
+        maintainAspectRatio: false,
+        plugins : {legend : {display: false}},
+        scales : {y : {beginAtZero : true}}
+      }
+    })
+
+  </script>

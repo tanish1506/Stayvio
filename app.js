@@ -22,6 +22,8 @@ const userRouter = require("./routes/user.js");
 const wishlistRouter = require("./routes/wishlist.js");
 const bookingRouter = require("./routes/booking.js")
 const paymentRouter = require("./routes/payment.js");
+const dashboardRouter = require("./routes/dashboard.js");
+const adminRouter = require("./routes/admin.js");
 
 app.engine("ejs", ejsMate);
 app.set("view engine","ejs");
@@ -78,7 +80,8 @@ app.use("/", userRouter);
 app.use("/wishlist", wishlistRouter);
 app.use("/",bookingRouter);
 app.use("/",paymentRouter);
-
+app.use("/",dashboardRouter);
+app.use("/",adminRouter);
 
 //Error handling through ExpressError
 app.use((req,res,next)=>{

@@ -26,6 +26,11 @@
               </div>
             </div>
             <div class="bshow-listing-actions">
+              <% if(booking.status === 'pending_approval'){ %>
+                <div style="font-size: 0.8rem; color: var(--color-cta); background: #fef3e8; padding: 0.4rem 0.8rem; border-radius: 8px; text-align: center;">
+                  ⏳ Waiting for host approval
+                </div>
+              <% } %>
               <% if(booking.status === 'pending_payment'){ %>
                 <button type="button" id="payNowBtn" class="bshow-btn-pay"
                   data-booking-id="<%= booking._id %>"
@@ -52,7 +57,9 @@
               <div class="bshow-meta-line">Check-out: <span><%= new Date(booking.checkOut).toDateString() %></span></div>
             </div>
             <div class="bshow-status-wrap">
-              <% if(booking.status === 'confirmed'){ %>
+              <% if(booking.status === 'pending_approval'){ %>
+                <span class="bshow-status pending">Awaiting Host Approval</span>
+              <% } else if(booking.status === 'confirmed'){ %>
                 <span class="bshow-status confirmed">Confirmed</span>
               <% } else if(booking.status === 'pending_payment'){ %>
                 <span class="bshow-status pending">Payment Pending</span>

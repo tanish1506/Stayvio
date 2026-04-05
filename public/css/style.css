@@ -1355,3 +1355,74 @@ body {
     border-radius: 8px;
     margin-bottom: 0.6rem;
 }
+
+
+/* User profile toggle */
+/* Navbar Profile Dropdown */
+.nav-profile-dropdown { position: relative; }
+.nav-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 20px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  color: white;
+  transition: background 0.2s;
+}
+.nav-profile-btn:hover { background: rgba(255,255,255,0.25); }
+.nav-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--color-cta);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem;
+}
+.nav-profile-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(44,36,22,0.15);
+  min-width: 180px;
+  padding: 0.5rem;
+  z-index: 1100;
+}
+.nav-profile-menu.open { display: block; }
+.nav-profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.nav-profile-menu-item:hover { background: var(--color-bg); color: var(--color-text); }
+.nav-profile-menu-item i { color: var(--color-nav); width: 16px; }
+
+/* Wishlist nav icon */
+.nav-wishlist-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.nav-wishlist-btn:hover {
+  background: rgba(255,255,255,0.25);
+  color: white;
+}

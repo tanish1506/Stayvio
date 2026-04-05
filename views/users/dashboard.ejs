@@ -1,0 +1,242 @@
+<% layout('/layouts/boilerplate') %>
+
+<div class="dash-page">
+  <div class="container py-4">
+
+    <!-- Header -->
+    <div class="dash-header">
+      <div>
+        <h2 class="dash-title">Host Dashboard</h2>
+        <p class="dash-sub">Welcome back, <strong><%= currUser.username %></strong> — here's your property overview</p>
+      </div>
+      <a href="/listings/new" class="btn-cta btn px-4">
+        <i class="fa-solid fa-plus me-2"></i>Add New Listing
+      </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="dash-stats-grid">
+      <div class="dash-stat-card">
+        <div class="dash-stat-icon" style="background:#f0f4e8;">
+          <i class="fa-solid fa-house" style="color:var(--color-nav);"></i>
+        </div>
+        <div class="dash-stat-info">
+          <div class="dash-stat-value"><%= listings.length %></div>
+          <div class="dash-stat-label">Total Listings</div>
+        </div>
+      </div>
+
+      <div class="dash-stat-card">
+        <div class="dash-stat-icon" style="background:#fef3e8;">
+          <i class="fa-solid fa-calendar-check" style="color:var(--color-cta);"></i>
+        </div>
+        <div class="dash-stat-info">
+          <div class="dash-stat-value"><%= bookings.length %></div>
+          <div class="dash-stat-label">Total Bookings</div>
+        </div>
+      </div>
+
+      <div class="dash-stat-card">
+        <div class="dash-stat-icon" style="background:#e8f4e8;">
+          <i class="fa-solid fa-indian-rupee-sign" style="color:#27ae60;"></i>
+        </div>
+        <div class="dash-stat-info">
+          <div class="dash-stat-value">₹<%= totalEarnings.toLocaleString('en-IN') %></div>
+          <div class="dash-stat-label">Total Earnings</div>
+        </div>
+      </div>
+
+      <div class="dash-stat-card">
+        <div class="dash-stat-icon" style="background:#fde8e8;">
+          <i class="fa-solid fa-clock" style="color:#e74c3c;"></i>
+        </div>
+        <div class="dash-stat-info">
+          <div class="dash-stat-value"><%= pendingBookings %></div>
+          <div class="dash-stat-label">Pending Payments</div>
+        </div>
+      </div>
+    </div>
+
+    <% if(pendingApprovals.length > 0){ %>
+      <div class="dash-approvals-section mb-3">
+        <div class="dash-section-card">
+          <div class="dash-section-header">
+            <h5 class="dash-section-title">
+              <i class="fa-solid fa-clock me-2" style="color:var(--color-cta);"></i>
+                Pending Approvals
+            </h5>
+            <span class="dash-section-count" style="background: #fef3e8; color: var(--color-cta);"><%= pendingApprovals.length %> pending</span>
+          </div>
+          <% for(let booking of pendingApprovals){ %>
+            <div class="dash-approval-row">
+              <div class="dash-booking-avatar"><%= booking.user.username.charAt(0).toUpperCase() %></div>
+              <div class="dash-booking-info">
+                <div class="dash-booking-guest">@<%= booking.user.username %></div>
+                <div class="dash-booking-listing"><%= booking.listing.title.substring(0,25) %></div>
+                <div class="dash-booking-dates">
+                  <%= new Date(booking.checkIn).toDateString() %> -> <%= new Date(booking.checkOut).toDateString() %>
+                  &nbsp;&bull;&nbsp; <%= booking.nights %>nights &nbsp;&bull;&nbsp; ₹<%= booking.totalPrice.toLocaleString('en-IN') %>
+                </div>
+              </div>
+              <div class="dash-approval-actions">
+                <form method="post" action="/bookings/<%= booking._id %>/approve" style="display: inline;">
+                  <button class="dash-approve-btn">
+                    <i class="fa-solid fa-check me-1"></i>Approve
+                  </button>
+                </form>
+                <form method="post" action="/bookings/<%= booking._id %>/reject" style="display: inline;">
+                  <button class="dash-reject-btn">
+                    <i class="fa-solid fa-xmark me-1"></i>Reject
+                  </button>
+                </form>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="dash-layout">
+
+      <!-- LEFT: My Listings -->
+      <div class="dash-main">
+        <div class="dash-section-card">
+          <div class="dash-section-header">
+            <h5 class="dash-section-title">My Listings</h5>
+            <span class="dash-section-count"><%= listings.length %> properties</span>
+          </div>
+
+          <% if(listings.length === 0){ %>
+            <div class="dash-empty">
+              <i class="fa-solid fa-house-circle-xmark fa-2x mb-2" style="color:var(--color-muted);"></i>
+              <p>No listings yet. Add your first property!</p>
+              <a href="/listings/new" class="btn-cta btn px-3 mt-1">Add Listing</a>
+            </div>
+          <% } else { %>
+            <div class="dash-listings-list">
+              <% for(let listing of listings){ %>
+                <div class="dash-listing-row">
+                  <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="dash-listing-img">
+                  <div class="dash-listing-info">
+                    <div class="dash-listing-title"><%= listing.title %></div>
+                    <div class="dash-listing-meta">
+                      <i class="fa-solid fa-location-dot me-1" style="color:var(--color-cta); font-size:0.75rem;"></i>
+                      <%= listing.location %>, <%= listing.country %>
+                    </div>
+                    <div class="dash-listing-meta">
+                      ₹<%= listing.price.toLocaleString('en-IN') %>/night
+                      <% if(listing.propertyType){ %> &bull; <%= listing.propertyType %><% } %>
+                    </div>
+                  </div>
+                  <div class="dash-listing-status">
+                    <form action="/listings/<%= listing._id %>/toggle-availability" method="post">
+                      <button type="submit" class="dash-avail-badge <%= listing.isAvailable ? 'available' : 'unavailable' %>">
+                        <i class="fa-solid fa-circle me-1 " style="font-size: 0.5rem;"></i>
+                        <%= listing.isAvailable ? 'Available' : 'Unavailable' %>
+                      </button>
+                    </form>
+                  </div>
+
+                  <div class="dash-listing-actions">
+                    <a href="/listings/<%= listing._id %>" class="dash-action-btn view">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+                    <a href="/listings/<%= listing._id %>/edit" class="dash-action-btn edit">
+                      <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="display:inline;">
+                      <button class="dash-action-btn delete" onclick="return confirm('Delete this listing?')">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- RIGHT: Recent Bookings -->
+      <div class="dash-sidebar">
+        <div class="dash-section-card">
+          <div class="dash-section-header">
+            <h5 class="dash-section-title">Recent Bookings</h5>
+            <span class="dash-section-count"><%= bookings.length %> total</span>
+          </div>
+
+          <% if(bookings.length === 0){ %>
+            <div class="dash-empty">
+              <i class="fa-solid fa-calendar-xmark fa-2x mb-2" style="color:var(--color-muted);"></i>
+              <p>No bookings yet.</p>
+            </div>
+          <% } else { %>
+            <% for(let booking of bookings.slice(0,8)){ %>
+              <div class="dash-booking-row">
+                <div class="dash-booking-avatar">
+                  <%= booking.user.username.charAt(0).toUpperCase() %>
+                </div>
+                <div class="dash-booking-info">
+                  <div class="dash-booking-guest">@<%= booking.user.username %></div>
+                  <div class="dash-booking-listing"><%= booking.listing.title.substring(0,22) %><%= booking.listing.title.length > 22 ? '...' : '' %></div>
+                  <div class="dash-booking-dates">
+                    <%= new Date(booking.checkIn).toDateString() %> → <%= new Date(booking.checkOut).toDateString() %>
+                  </div>
+                </div>
+                <div class="dash-booking-right">
+                  <div class="dash-booking-amount">₹<%= booking.totalPrice.toLocaleString('en-IN') %></div>
+                  <% if(booking.status === 'confirmed'){ %>
+                    <span class="dash-booking-badge confirmed">Confirmed</span>
+                  <% } else if(booking.status === 'pending_payment'){ %>
+                    <span class="dash-booking-badge pending">Pending</span>
+                  <% } else if(booking.status === 'cancelled'){ %>
+                    <span class="dash-booking-badge cancelled">Cancelled</span>
+                  <% } else { %>
+                    <span class="dash-booking-badge completed">Completed</span>
+                  <% } %>
+                </div>
+              </div>
+            <% } %>
+          <% } %>
+        </div>
+        <!-- REview received -->
+        <div class="dash-section-card mt-3">
+          <div class="dash-section-header">
+            <h5>Reviews Received</h5>
+            <span class="dash-section-count"><%= allReviews.length %></span>
+          </div>
+  
+          <% if(allReviews.length === 0){ %>
+            <div class="dash-empty">
+              <i class="fa-regular fa-star fa-2x mb-2" style="color: var(--color-muted);"></i>
+              <p>No reviews yet.</p>
+            </div>
+          <% }else{ %>
+            <% for(let review of allReviews.slice(0,6)){ %>
+              <div class="dash-booking-row">
+                <div class="dash-booking-avatar">
+                  <%= review.author ? review.author.username.charAt(0).toUpperCase() : 'G' %>
+                </div>
+                <div class="dash-booking-info">
+                  <div class="dash-booking-guest">@<%= review.author ? review.author.username : 'Guest' %></div>
+  
+                  <div class="dash-booking-listing"><%= review.listingTitle.substring(0,22) %></div>
+  
+                  <div class="dash-booking-dates"><%= review.comment.substring(0,50) %><%= review.comment.length > 50 ? '...' : '' %></div>
+                </div>
+                <div class="dash-booking-right">
+                  <span style="font-weight: 700; font-size: 0.9rem; color: var(--color-cta);">★<%= review.rating %></span>
+                </div>
+              </div>
+            <% } %>
+          <% } %>
+  
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+
