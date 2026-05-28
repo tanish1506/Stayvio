@@ -101,7 +101,7 @@ module.exports.createListings = async (req,res,next)=>{
     }
     
     await newListing.save();
-    req.flash("sucess", "New Listing Created!!");
+    req.flash("success", "New Listing Created!!");
     res.redirect("/listings");    
 }
 
@@ -145,7 +145,7 @@ module.exports.updateListings = async (req,res)=>{
 module.exports.destroyListings = async (req,res)=>{
     let {id} = req.params;
     let deletedListing = await Listing.findByIdAndDelete(id);
-    req.flash("sucess","Listing Deleted!!")
+    req.flash("success","Listing Deleted!!")
     res.redirect("/listings")
 }
 
@@ -153,6 +153,6 @@ module.exports.toggleAvailability = async(req,res) => {
     const listing = await Listing.findById(req.params.id);;
     listing.isAvailable  = !listing.isAvailable;
     await listing.save();
-    req.flash("sucess",`Listing marked as ${listing.isAvailable ? 'Available' : 'Unavailable'}`);
+    req.flash("success",`Listing marked as ${listing.isAvailable ? 'Available' : 'Unavailable'}`);
     res.redirect('/dashboard');
 }

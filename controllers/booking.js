@@ -81,7 +81,7 @@ module.exports.createBooking = async (req,res) => {
         $push : {bookings : newBooking._id}
     });
 
-    req.flash("sucess",'Booking created successfully! Please complete payment.');
+    req.flash("success",'Booking created successfully! Please complete payment.');
     res.redirect(`/bookings/${newBooking._id}`);
 }
 
@@ -127,7 +127,7 @@ module.exports.cancelBooking = async(req,res) => {
 
     booking.status = "cancelled";
     await booking.save();
-    req.flash("sucess","Booking cancelled successfully");
+    req.flash("success","Booking cancelled successfully");
     res.redirect("/bookings");
 }
 
@@ -149,7 +149,7 @@ module.exports.approveBooking = async (req,res) => {
     booking.status = 'pending_payment';
     await booking.save();
 
-    req.flash("sucess","Booking approved! Guest can now make payment");
+    req.flash("success","Booking approved! Guest can now make payment");
     res.redirect("/dashboard");
 }
 
@@ -170,6 +170,6 @@ module.exports.rejectBooking = async(req,res)=>{
     booking.status = 'cancelled';
     await booking.save();
 
-    req.flash("sucess","Booking rejected.");
+    req.flash("success","Booking rejected.");
     res.redirect("/dashboard");
 }

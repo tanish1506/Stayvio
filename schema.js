@@ -35,3 +35,16 @@ module.exports.bookingSchema = Joi.object({
     checkOut : Joi.date().greater(Joi.ref('checkIn')).required(),
     guests : Joi.number().integer().min(1).required(),
 })
+
+module.exports.tripPlanSchema = Joi.object({
+    destination : Joi.string().required(),
+    totalBudget : Joi.number().min(500).required(),
+    duration : Joi.number().integer().min(1).max(30).required(),
+    travelers : Joi.number().integer().min(1).max(20).required(),
+    interests : Joi.array().items(Joi.string().valid('adventure','culture','food','relaxation')).min(1).required(),
+    sourceCity : Joi.string().allow("",null).optional(),
+    transportPreference : Joi.string().valid('cheapest','fastest','no_preference').allow("",null).optional(),
+    checkIn : Joi.date().allow("",null).optional(),
+    checkOut : Joi.date().allow("",null).optional(),
+    label : Joi.string().max(60).allow("",null).optional(),
+})

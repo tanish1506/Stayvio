@@ -1,0 +1,549 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Hero Header -->
+<div style="background: linear-gradient(135deg, #708238 0%, #4a5a20 60%, #2C2416 100%); padding: 2.5rem 0; position: relative; overflow: hidden;">
+  <div style="position: absolute; inset: 0; opacity: 0.05; background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+  <div class="container" style="max-width: 900px; position: relative; z-index: 1;">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 0.25rem 0.8rem; margin-bottom: 0.8rem; backdrop-filter: blur(10px);">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: #E07B39; font-size: 0.75rem;"></i>
+          <span style="color: rgba(255,255,255,0.9); font-size: 0.75rem;">AI Generated Plan</span>
+        </div>
+        <h1 style="color: white; font-weight: 800; font-size: 2.2rem; margin: 0 0 0.5rem;">
+          <i class="fa-solid fa-map-location-dot me-2" style="color: #E07B39;"></i><%= plan.destination %>
+        </h1>
+        <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; display: flex; gap: 1.2rem; flex-wrap: wrap;">
+          <span><i class="fa-solid fa-indian-rupee-sign me-1"></i>₹<%= plan.totalBudget.toLocaleString('en-IN') %></span>
+          <span><i class="fa-regular fa-calendar me-1"></i><%= plan.duration %> days</span>
+          <span><i class="fa-solid fa-users me-1"></i><%= plan.travelers %> traveler<%= plan.travelers > 1 ? 's' : '' %></span>
+          <% if(plan.label){ %><span><i class="fa-solid fa-tag me-1"></i>"<%= plan.label %>"</span><% } %>
+        </div>
+      </div>
+      <div>
+        <% if(plan.status === 'saved'){ %>
+          <span style="background: rgba(255,255,255,0.2); color: white; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 20px; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; backdrop-filter: blur(10px);">
+            <i class="fa-solid fa-bookmark me-1"></i> Saved
+          </span>
+        <% } else { %>
+          <form action="/trip-planner/<%= plan._id %>/save?_method=PATCH" method="POST" style="display:inline;">
+            <button style="background: #E07B39; color: white; border: none; border-radius: 20px; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font-main);">
+              <i class="fa-regular fa-bookmark me-1"></i> Save Plan
+            </button>
+          </form>
+        <% } %>
+        <!-- Regenerate Button -->
+        <button onclick="toggleRegenerateForm()" 
+            style="background: rgba(255,255,255,0.15); color: white; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 20px; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font-main); backdrop-filter: blur(10px); margin-top: 0.5rem;">
+            <i class="fa-solid fa-rotate me-1"></i> Regenerate
+        </button>
+        <div class="shareSection" style="margin-top: 0.5rem;">
+          <% if(plan.isPublic){ %>
+            <!-- Already shared show link + revoke option -->
+             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <input type="text" id="shareUrlInput" value="<%= `${protocol}://${host}/trip-planner/share/${plan.shareToken}` %>"
+                style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 0.3rem 0.7rem; color: white; font-size: 0.78rem; width: 260px; font-family: var(--font-main);" readonly>
+              <button onclick="copyShareUrl()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 0.3rem 0.7rem; font-size: 0.78rem; cursor: pointer;">
+                <i class="fa-regular fa-copy"></i>Copy
+              </button>
+              <button onclick="toggleShare('<%=  plan._id %>')" style="background: rgba(231, 76, 60, 0.5); border-radius: 8px; padding: 0.3rem 0.7rem; font-size: 0.78rem; cursor: pointer;">
+                Revoke
+              </button>
+             </div>
+          <% } else { %>
+            <!-- Not shared yet -->
+            <button onclick="toggleShare('<%= plan._id %>')" id="shareBtn"
+                style="background: rgba(255,255,255,0.15); color: white; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 20px; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font-main); backdrop-filter: blur(10px);">
+                <i class="fa-solid fa-share-nodes me-1"></i> Share Plan
+            </button>
+          <% } %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Main Content -->
+<div style="background: var(--color-bg); padding: 2rem 0 4rem;">
+  <div class="container" style="max-width: 900px;">
+
+    <!-- Regenerate Form — hidden by default -->
+    <div id="regenerateForm" style="display: none;" class="sp-card mb-3">
+        <div class="sp-section-title">
+            <i class="fa-solid fa-rotate"></i> Regenerate Plan
+        </div>
+        <p style="font-size: 0.85rem; color: var(--color-muted); margin-bottom: 1rem;">
+            Change any field below — leave blank to keep existing value.
+        </p>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.3rem;">Budget (₹)</label>
+                <input type="number" id="regen_budget" class="lform-input" placeholder="<%= plan.totalBudget %>">
+            </div>
+            <div class="col-md-4">
+                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.3rem;">Duration (days)</label>
+                <input type="number" id="regen_duration" class="lform-input" placeholder="<%= plan.duration %>">
+            </div>
+            <div class="col-md-4">
+                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.3rem;">Travelers</label>
+                <input type="number" id="regen_travelers" class="lform-input" placeholder="<%= plan.travelers %>">
+            </div>
+        </div>
+        <div class="mt-3 d-flex gap-2">
+            <button onclick="submitRegenerate('<%= plan._id %>')" id="regenBtn"
+                style="background: var(--color-cta); color: white; border: none; border-radius: 8px; padding: 0.6rem 1.5rem; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: var(--font-main);">
+                <span id="regenBtnText"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> Confirm Regenerate</span>
+                <span id="regenBtnSpinner" style="display:none;"><span class="spinner-border spinner-border-sm me-1"></span> Regenerating...</span>
+            </button>
+            <button onclick="toggleRegenerateForm()"
+                style="background: transparent; color: var(--color-muted); border: 1.5px solid #e0d5c8; border-radius: 8px; padding: 0.6rem 1.2rem; font-size: 0.88rem; cursor: pointer; font-family: var(--font-main);">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Budget Breakdown -->
+    <div class="sp-card mb-3">
+      <div class="sp-section-title">
+        <i class="fa-solid fa-chart-pie"></i> Budget Breakdown
+      </div>
+      <div class="sp-budget-grid">
+        <% if(plan.itinerary.budgetBreakdown.travel){ %>
+        <div class="sp-budget-item" style="--accent: #3498db;">
+          <div class="sp-budget-emoji">✈️</div>
+          <div class="sp-budget-amount">₹<%= plan.itinerary.budgetBreakdown.travel.toLocaleString('en-IN') %></div>
+          <div class="sp-budget-label">Travel</div>
+        </div>
+        <% } %>
+        <div class="sp-budget-item" style="--accent: #708238;">
+          <div class="sp-budget-emoji">🏠</div>
+          <div class="sp-budget-amount">₹<%= plan.itinerary.budgetBreakdown.accommodation.toLocaleString('en-IN') %></div>
+          <div class="sp-budget-label">Stay</div>
+        </div>
+        <div class="sp-budget-item" style="--accent: #E07B39;">
+          <div class="sp-budget-emoji">🍽️</div>
+          <div class="sp-budget-amount">₹<%= plan.itinerary.budgetBreakdown.food.toLocaleString('en-IN') %></div>
+          <div class="sp-budget-label">Food</div>
+        </div>
+        <div class="sp-budget-item" style="--accent: #9b59b6;">
+          <div class="sp-budget-emoji">🎯</div>
+          <div class="sp-budget-amount">₹<%= plan.itinerary.budgetBreakdown.activities.toLocaleString('en-IN') %></div>
+          <div class="sp-budget-label">Activities</div>
+        </div>
+        <div class="sp-budget-item" style="--accent: #e67e22;">
+          <div class="sp-budget-emoji">🚌</div>
+          <div class="sp-budget-amount">₹<%= plan.itinerary.budgetBreakdown.localTransport.toLocaleString('en-IN') %></div>
+          <div class="sp-budget-label">Transport</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day-wise Itinerary -->
+    <div class="sp-card mb-3">
+      <div class="sp-section-title">
+        <i class="fa-solid fa-calendar-days"></i> Day-wise Itinerary
+      </div>
+
+      <% plan.itinerary.dailyItinerary.forEach(function(day, index){ %>
+      <div class="sp-day-card mb-3">
+        <div class="sp-day-header">
+          <div class="sp-day-badge">Day <%= day.day %></div>
+          <div class="sp-day-title"><%= day.title %></div>
+        </div>
+
+        <div class="sp-day-body">
+          <!-- Activities -->
+          <% if(day.activities && day.activities.length > 0){ %>
+          <div class="sp-day-section">
+            <div class="sp-day-section-label">🎯 Activities</div>
+            <% day.activities.forEach(function(act){ %>
+            <div class="sp-item-row">
+              <div class="sp-item-name">
+                <%= act.name %>
+                <% if(act.duration){ %><span class="sp-item-meta">(<%= act.duration %>)</span><% } %>
+              </div>
+              <div class="sp-item-cost"><%= act.cost > 0 ? '₹' + act.cost : 'Free' %></div>
+            </div>
+            <% }) %>
+          </div>
+          <% } %>
+
+          <!-- Food -->
+          <% if(day.food && day.food.length > 0){ %>
+          <div class="sp-day-section">
+            <div class="sp-day-section-label">🍽️ Food & Drinks</div>
+            <% day.food.forEach(function(f){ %>
+            <div class="sp-item-row">
+              <div class="sp-item-name">
+                <%= f.place %>
+                <% if(f.meal){ %><span class="sp-item-meta">— <%= f.meal %></span><% } %>
+              </div>
+              <div class="sp-item-cost"><%= f.cost > 0 ? '₹' + f.cost : 'Free' %></div>
+            </div>
+            <% }) %>
+          </div>
+          <% } %>
+
+          <!-- Transport -->
+          <% if(day.localTransport){ %>
+          <div class="sp-transport-row">
+            <i class="fa-solid fa-route" style="color: var(--color-nav);"></i>
+            <span><%= day.localTransport %></span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+
+    <!-- Money Saving Tips -->
+    <% if(plan.itinerary.tips && plan.itinerary.tips.length > 0){ %>
+    <div class="sp-card mb-3">
+      <div class="sp-section-title">
+        <i class="fa-solid fa-lightbulb"></i> Money Saving Tips
+      </div>
+      <div class="sp-tips-grid">
+        <% plan.itinerary.tips.forEach(function(tip, i){ %>
+        <div class="sp-tip-item">
+          <div class="sp-tip-num"><%= i + 1 %></div>
+          <div class="sp-tip-text"><%= tip %></div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Suggested Listings -->
+    <div class="sp-card mb-3">
+      <div class="sp-section-title">
+        <i class="fa-solid fa-house"></i> Suggested Stays from Stayvio
+      </div>
+      <% if(plan.suggestedListings && plan.suggestedListings.length > 0){ %>
+      <div class="row g-3">
+        <% plan.suggestedListings.forEach(function(listing){ %>
+        <div class="col-md-4">
+          <div class="sp-listing-card">
+            <% if(listing.image){ %>
+            <img src="<%= listing.image.url || listing.image %>" alt="<%= listing.title %>" class="sp-listing-img">
+            <% } %>
+            <div class="sp-listing-body">
+              <div class="sp-listing-title"><%= listing.title %></div>
+              <div class="sp-listing-loc"><i class="fa-solid fa-location-dot me-1" style="color: var(--color-cta);"></i><%= listing.location %></div>
+              <div class="sp-listing-price">₹<%= listing.price.toLocaleString('en-IN') %><span>/night</span></div>
+              <a href="/listings/<%= listing._id %>" class="sp-listing-btn">View Listing</a>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } else { %>
+      <div style="text-align: center; padding: 2rem; color: var(--color-muted);">
+        <i class="fa-solid fa-house-circle-xmark fa-2x mb-2" style="display: block;"></i>
+        No matching stays found in your budget.
+        <a href="/listings" style="color: var(--color-cta); font-weight: 600;">Browse all listings →</a>
+      </div>
+      <% } %>
+    </div>
+
+    <% if(plan.packingList && plan.packingList.length > 0){ %>
+      <div class="sp-card mb-3">
+        <div class="sp-section-title">
+          <i class="fa-solid fa-bag-shopping"></i>Packing List
+        </div>
+        <div class="row g-2">
+          <% plan.packingList.forEach(function(item){ %>
+            <div class="col-6 col-md-4">
+              <div style="display: flex; align-items: center; gap: 0.5rem; background: #faf7f3; border: 1.5px solid #e0d5c8; border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.85rem; color: var(--color-text);">
+                <i class="fa-solid fa-check" style="color: var(--color-nav); font-size: 0.75rem;"></i>
+                <%= item %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+
+      </div>
+
+    <% } %>
+
+    <!-- Download PDF button -->
+    <div class="text-end mb-2">
+        <a href="/trip-planner/<%= plan._id %>/export/pdf" 
+            style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--color-nav); color: white; border-radius: 8px; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: background 0.2s;"
+            onmouseover="this.style.background='#5a6b2a'" 
+            onmouseout="this.style.background='var(--color-nav)'">
+            <i class="fa-solid fa-file-pdf"></i> Download PDF
+        </a>
+    </div>
+
+    <!-- Delete -->
+    <div class="text-end">
+      <form action="/trip-planner/<%= plan._id %>?_method=DELETE" method="POST"
+        onsubmit="return confirm('Delete this trip plan?')">
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+          <i class="fa-solid fa-trash me-1"></i> Delete Plan
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function toggleRegenerateForm(){
+    const form = document.getElementById('regenerateForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+
+  async function submitRegenerate(planId) {
+    const budget = document.getElementById('regen_budget').value;
+    const duration = document.getElementById('regen_duration').value;
+    const travelers = document.getElementById('regen_travelers').value;
+
+    //spinner 
+    document.getElementById('regenBtnText').style.display = 'none';
+    document.getElementById('regenBtnSpinner').style.display = "inline";
+    document.getElementById('regenBtn').disabled = true;
+
+    //AJAX REQUEST
+    const response = await fetch(`/trip-planner/${planId}/regenerate`,{
+      method : 'PATCH',
+      headers : {'Content-Type' : 'application/json'},
+      body : JSON.stringify({
+        totalBudget : budget || null,
+        duration : duration || null,
+        travelers : travelers || null,
+      })
+    })
+    const data = await response.json();
+
+    if(data.success){
+      window.location.reload(); // page reload with regenerated plan
+    }else {
+      alert('Regeneration failed. Please try again');
+      document.getElementById('regenBtnText').style.display = 'inline';
+      document.getElementById('regenBtnSpinner').style.display = "none";
+      document.getElementById('regenBtn').disabled = false;
+    }
+  }
+
+  async function toggleShare(planId) {
+      const response = await fetch(`/trip-planner/${planId}/share`,{
+        method: 'PATCH',
+        headers :  {'Content-Type' : 'application/json'}
+      });
+      const data = await response.json();
+
+      if(data.shareUrl){
+        //share ON hua - page reload karo tki link dikhe
+        window.location.reload();
+      }else if(data.revoked){
+        //share off page reload
+        window.location.reload();
+      }
+  }
+  function copyShareUrl(){
+    const input = document.getElementById('shareUrlInput');
+    navigator.clipboard.writeText(input.value).then(() => {
+      alert('Link copied to clipboard!');
+    })
+  }
+</script>
+
+<style>
+.sp-card {
+  background: var(--color-white);
+  border-radius: 16px;
+  box-shadow: 0 2px 20px rgba(44,36,22,0.08);
+  padding: 1.8rem;
+  border: 1px solid rgba(224,213,200,0.4);
+}
+
+.sp-section-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-text);
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid #f0e8dc;
+}
+
+.sp-section-title i { color: var(--color-nav); margin-right: 0.4rem; }
+
+/* Budget Grid */
+.sp-budget-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.8rem;
+}
+
+.sp-budget-item {
+  background: linear-gradient(135deg, rgba(var(--accent-rgb, 112,130,56), 0.08), rgba(var(--accent-rgb, 112,130,56), 0.03));
+  border: 1.5px solid rgba(224,213,200,0.6);
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.sp-budget-item:hover { transform: translateY(-2px); }
+.sp-budget-emoji { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.sp-budget-amount { font-weight: 700; font-size: 0.95rem; color: var(--color-text); }
+.sp-budget-label { font-size: 0.72rem; color: var(--color-muted); margin-top: 0.2rem; }
+
+/* Day Cards */
+.sp-day-card {
+  border: 1.5px solid #e8ddd0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.sp-day-header {
+  background: linear-gradient(135deg, #708238, #5a6b2a);
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.sp-day-badge {
+  background: rgba(255,255,255,0.25);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.sp-day-title {
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.sp-day-body { padding: 1rem 1.2rem; }
+
+.sp-day-section { margin-bottom: 0.8rem; }
+
+.sp-day-section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sp-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #f5ede4;
+  font-size: 0.85rem;
+}
+
+.sp-item-row:last-child { border-bottom: none; }
+.sp-item-name { color: var(--color-text); flex: 1; }
+.sp-item-meta { color: var(--color-muted); font-size: 0.78rem; margin-left: 0.3rem; }
+.sp-item-cost { font-weight: 600; color: var(--color-nav); white-space: nowrap; margin-left: 1rem; font-size: 0.85rem; }
+
+.sp-transport-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  background: #f9f5f0;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* Tips */
+.sp-tips-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.sp-tip-item {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  background: #fef9f4;
+  border: 1px solid #f0e8dc;
+  border-radius: 10px;
+  padding: 0.8rem;
+}
+
+.sp-tip-num {
+  background: var(--color-cta);
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sp-tip-text { font-size: 0.83rem; color: var(--color-text); line-height: 1.5; }
+
+/* Listings */
+.sp-listing-card {
+  border: 1.5px solid #e0d5c8;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sp-listing-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(44,36,22,0.12);
+}
+
+.sp-listing-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.sp-listing-body { padding: 0.8rem; }
+.sp-listing-title { font-weight: 600; font-size: 0.88rem; color: var(--color-text); margin-bottom: 0.2rem; }
+.sp-listing-loc { font-size: 0.75rem; color: var(--color-muted); margin-bottom: 0.4rem; }
+.sp-listing-price { font-weight: 700; color: var(--color-cta); font-size: 0.95rem; margin-bottom: 0.6rem; }
+.sp-listing-price span { font-size: 0.75rem; font-weight: 400; color: var(--color-muted); }
+
+.sp-listing-btn {
+  display: block;
+  text-align: center;
+  background: var(--color-nav);
+  color: white;
+  border-radius: 8px;
+  padding: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.sp-listing-btn:hover { background: #5a6b2a; color: white; }
+
+@media (max-width: 768px) {
+  .sp-budget-grid { grid-template-columns: repeat(3, 1fr); }
+  .sp-tips-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .sp-budget-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>

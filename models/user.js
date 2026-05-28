@@ -76,7 +76,14 @@ const userSchema = new Schema({
             }
         ],
         default : []
-    }
+    },
+    tripPlans : {
+        type : [{
+            type : Schema.Types.ObjectId,
+            ref : 'TripPlan',
+        }],
+        default : [],
+    },
 })
 
 userSchema.plugin(passportLocalMongoose)

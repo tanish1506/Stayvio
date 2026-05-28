@@ -1,0 +1,374 @@
+<% layout("/layouts/boilerplate") %>
+
+    <!-- Hero Header — Read Only -->
+    <div
+        style="background: linear-gradient(135deg, #708238 0%, #4a5a20 60%, #2C2416 100%); padding: 2.5rem 0; position: relative; overflow: hidden;">
+        <div class="container" style="max-width: 900px; position: relative; z-index: 1;">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <div
+                        style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 0.25rem 0.8rem; margin-bottom: 0.8rem;">
+                        <i class="fa-solid fa-share-nodes" style="color: #E07B39; font-size: 0.75rem;"></i>
+                        <span style="color: rgba(255,255,255,0.9); font-size: 0.75rem;">Shared Trip Plan — Read
+                            Only</span>
+                    </div>
+                    <h1 style="color: white; font-weight: 800; font-size: 2.2rem; margin: 0 0 0.5rem;">
+                        <i class="fa-solid fa-map-location-dot me-2" style="color: #E07B39;"></i>
+                        <%= plan.destination %>
+                    </h1>
+                    <div
+                        style="color: rgba(255,255,255,0.8); font-size: 0.9rem; display: flex; gap: 1.2rem; flex-wrap: wrap;">
+                        <span><i class="fa-solid fa-indian-rupee-sign me-1"></i>₹<%=
+                                plan.totalBudget.toLocaleString('en-IN') %></span>
+                        <span><i class="fa-regular fa-calendar me-1"></i>
+                            <%= plan.duration %> days
+                        </span>
+                        <span><i class="fa-solid fa-users me-1"></i>
+                            <%= plan.travelers %> traveler<%= plan.travelers> 1 ? 's' : '' %>
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <a href="/trip-planner/new"
+                        style="background: #E07B39; color: white; border-radius: 20px; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Plan My Own Trip
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div style="background: var(--color-bg); padding: 2rem 0 4rem;">
+        <div class="container" style="max-width: 900px;">
+
+            <!-- Budget Breakdown -->
+            <div class="sp-card mb-3">
+                <div class="sp-section-title">
+                    <i class="fa-solid fa-chart-pie"></i> Budget Breakdown
+                </div>
+                <div class="sp-budget-grid">
+                    <% if(plan.itinerary.budgetBreakdown.travel){ %>
+                        <div class="sp-budget-item">
+                            <div class="sp-budget-emoji">✈️</div>
+                            <div class="sp-budget-amount">₹<%=
+                                    plan.itinerary.budgetBreakdown.travel.toLocaleString('en-IN') %>
+                            </div>
+                            <div class="sp-budget-label">Travel</div>
+                        </div>
+                        <% } %>
+                            <div class="sp-budget-item">
+                                <div class="sp-budget-emoji">🏠</div>
+                                <div class="sp-budget-amount">₹<%=
+                                        plan.itinerary.budgetBreakdown.accommodation.toLocaleString('en-IN') %>
+                                </div>
+                                <div class="sp-budget-label">Stay</div>
+                            </div>
+                            <div class="sp-budget-item">
+                                <div class="sp-budget-emoji">🍽️</div>
+                                <div class="sp-budget-amount">₹<%=
+                                        plan.itinerary.budgetBreakdown.food.toLocaleString('en-IN') %>
+                                </div>
+                                <div class="sp-budget-label">Food</div>
+                            </div>
+                            <div class="sp-budget-item">
+                                <div class="sp-budget-emoji">🎯</div>
+                                <div class="sp-budget-amount">₹<%=
+                                        plan.itinerary.budgetBreakdown.activities.toLocaleString('en-IN') %>
+                                </div>
+                                <div class="sp-budget-label">Activities</div>
+                            </div>
+                            <div class="sp-budget-item">
+                                <div class="sp-budget-emoji">🚌</div>
+                                <div class="sp-budget-amount">₹<%=
+                                        plan.itinerary.budgetBreakdown.localTransport.toLocaleString('en-IN') %>
+                                </div>
+                                <div class="sp-budget-label">Transport</div>
+                            </div>
+                </div>
+            </div>
+
+            <!-- Day-wise Itinerary -->
+            <div class="sp-card mb-3">
+                <div class="sp-section-title">
+                    <i class="fa-solid fa-calendar-days"></i> Day-wise Itinerary
+                </div>
+                <% plan.itinerary.dailyItinerary.forEach(function(day){ %>
+                    <div class="sp-day-card mb-3">
+                        <div class="sp-day-header">
+                            <div class="sp-day-badge">Day <%= day.day %>
+                            </div>
+                            <div class="sp-day-title">
+                                <%= day.title %>
+                            </div>
+                        </div>
+                        <div class="sp-day-body">
+                            <% if(day.activities && day.activities.length> 0){ %>
+                                <div class="sp-day-section">
+                                    <div class="sp-day-section-label">🎯 Activities</div>
+                                    <% day.activities.forEach(function(act){ %>
+                                        <div class="sp-item-row">
+                                            <div class="sp-item-name">
+                                                <%= act.name %>
+                                                    <% if(act.duration){ %><span class="sp-item-meta">(<%= act.duration
+                                                                %>)</span>
+                                                        <% } %>
+                                            </div>
+                                            <div class="sp-item-cost">
+                                                <%= act.cost> 0 ? '₹' + act.cost : 'Free' %>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+                                </div>
+                                <% } %>
+                                    <% if(day.food && day.food.length> 0){ %>
+                                        <div class="sp-day-section">
+                                            <div class="sp-day-section-label">🍽️ Food & Drinks</div>
+                                            <% day.food.forEach(function(f){ %>
+                                                <div class="sp-item-row">
+                                                    <div class="sp-item-name">
+                                                        <%= f.place %>
+                                                            <% if(f.meal){ %><span class="sp-item-meta">— <%= f.meal %>
+                                                                        </span>
+                                                                <% } %>
+                                                    </div>
+                                                    <div class="sp-item-cost">
+                                                        <%= f.cost> 0 ? '₹' + f.cost : 'Free' %>
+                                                    </div>
+                                                </div>
+                                                <% }) %>
+                                        </div>
+                                        <% } %>
+                                            <% if(day.localTransport){ %>
+                                                <div class="sp-transport-row">
+                                                    <i class="fa-solid fa-route" style="color: var(--color-nav);"></i>
+                                                    <span>
+                                                        <%= day.localTransport %>
+                                                    </span>
+                                                </div>
+                                                <% } %>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+
+            <!-- Tips -->
+            <% if(plan.itinerary.tips && plan.itinerary.tips.length> 0){ %>
+                <div class="sp-card mb-3">
+                    <div class="sp-section-title"><i class="fa-solid fa-lightbulb"></i> Money Saving Tips</div>
+                    <div class="sp-tips-grid">
+                        <% plan.itinerary.tips.forEach(function(tip, i){ %>
+                            <div class="sp-tip-item">
+                                <div class="sp-tip-num">
+                                    <%= i + 1 %>
+                                </div>
+                                <div class="sp-tip-text">
+                                    <%= tip %>
+                                </div>
+                            </div>
+                            <% }) %>
+                    </div>
+                </div>
+                <% } %>
+
+                    <!-- CTA -->
+                    <div class="text-center mt-4">
+                        <p style="color: var(--color-muted); font-size: 0.9rem;">Want to plan your own trip?</p>
+                        <a href="/trip-planner/new"
+                            style="background: linear-gradient(135deg, var(--color-cta), #c9692e); color: white; border-radius: 12px; padding: 0.8rem 2rem; font-size: 1rem; font-weight: 700; text-decoration: none;">
+                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Plan My Trip with AI
+                        </a>
+                    </div>
+
+        </div>
+    </div>
+
+    <style>
+        .sp-card {
+            background: var(--color-white);
+            border-radius: 16px;
+            box-shadow: 0 2px 20px rgba(44, 36, 22, 0.08);
+            padding: 1.8rem;
+            border: 1px solid rgba(224, 213, 200, 0.4);
+        }
+
+        .sp-section-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--color-text);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid #f0e8dc;
+        }
+
+        .sp-section-title i {
+            color: var(--color-nav);
+            margin-right: 0.4rem;
+        }
+
+        .sp-budget-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.8rem;
+        }
+
+        .sp-budget-item {
+            border: 1.5px solid rgba(224, 213, 200, 0.6);
+            border-radius: 12px;
+            padding: 1rem 0.5rem;
+            text-align: center;
+        }
+
+        .sp-budget-emoji {
+            font-size: 1.6rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .sp-budget-amount {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--color-text);
+        }
+
+        .sp-budget-label {
+            font-size: 0.72rem;
+            color: var(--color-muted);
+            margin-top: 0.2rem;
+        }
+
+        .sp-day-card {
+            border: 1.5px solid #e8ddd0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .sp-day-header {
+            background: linear-gradient(135deg, #708238, #5a6b2a);
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .sp-day-badge {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+        }
+
+        .sp-day-title {
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .sp-day-body {
+            padding: 1rem 1.2rem;
+        }
+
+        .sp-day-section {
+            margin-bottom: 0.8rem;
+        }
+
+        .sp-day-section-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--color-muted);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .sp-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #f5ede4;
+            font-size: 0.85rem;
+        }
+
+        .sp-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .sp-item-name {
+            color: var(--color-text);
+            flex: 1;
+        }
+
+        .sp-item-meta {
+            color: var(--color-muted);
+            font-size: 0.78rem;
+            margin-left: 0.3rem;
+        }
+
+        .sp-item-cost {
+            font-weight: 600;
+            color: var(--color-nav);
+            white-space: nowrap;
+            margin-left: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .sp-transport-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--color-muted);
+            background: #f9f5f0;
+            border-radius: 8px;
+            padding: 0.5rem 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .sp-tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.7rem;
+        }
+
+        .sp-tip-item {
+            display: flex;
+            gap: 0.7rem;
+            align-items: flex-start;
+            background: #fef9f4;
+            border: 1px solid #f0e8dc;
+            border-radius: 10px;
+            padding: 0.8rem;
+        }
+
+        .sp-tip-num {
+            background: var(--color-cta);
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .sp-tip-text {
+            font-size: 0.83rem;
+            color: var(--color-text);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .sp-budget-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .sp-tips-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>

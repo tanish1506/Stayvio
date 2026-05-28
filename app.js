@@ -15,6 +15,7 @@ const flash = require("connect-flash")
 const passport = require("passport")
 const LocalStrategy = require("passport-local")
 const User = require("./models/user.js")
+const MongoStore = require("connect-mongo").default;
 
 const listingRouter = require("./routes/listing.js")
 const reviewRouter = require("./routes/review.js")
@@ -24,6 +25,7 @@ const bookingRouter = require("./routes/booking.js")
 const paymentRouter = require("./routes/payment.js");
 const dashboardRouter = require("./routes/dashboard.js");
 const adminRouter = require("./routes/admin.js");
+const tripPlannerRouter = require("./routes/tripPlanner.js");
 
 app.engine("ejs", ejsMate);
 app.set("view engine","ejs");
@@ -43,9 +45,13 @@ async function main(){
 }
 
 const sessionOptions = {
-    secret : "mysupersecretcode",
+    secret : process.env.SECRET || "mysuperSecretCode",
     resave : false,
-    saveUninitialized : true ,
+    saveUninitialized : false,
+    store : MongoStore.create({
+        mongoUrl : process.env.MONGO_URL,
+        touchAfter : 24*3600
+    }),
     cookie : {
         expires : Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge : 7 * 24 * 60 * 60 * 1000,
@@ -66,7 +72,7 @@ passport.deserializeUser(User.deserializeUser());
 
 
 app.use((req,res,next) => {
-    res.locals.sucess = req.flash('sucess');
+    res.locals.success = req.flash('success');
     res.locals.error = req.flash('error')
     res.locals.currUser = req.user;
     next();
@@ -82,6 +88,7 @@ app.use("/",bookingRouter);
 app.use("/",paymentRouter);
 app.use("/",dashboardRouter);
 app.use("/",adminRouter);
+app.use("/trip-planner",tripPlannerRouter);
 
 //Error handling through ExpressError
 app.use((req,res,next)=>{

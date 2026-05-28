@@ -1,7 +1,8 @@
 const Listing = require("./models/listing");
 const Review = require('./models/review');
+const TripPlan = require("./models/tripPlan.js");
 const ExpressError = require("./utils/ExpressError")
-const {listingSchema , reviewSchema} = require("./schema.js")
+const {listingSchema , reviewSchema , tripPlanSchema} = require("./schema.js")
 const {bookingSchema} = require("./schema.js");
  
 module.exports.isLoggedIn = (req,res,next)=>{
@@ -88,5 +89,32 @@ module.exports.isAdmin = (req,res,next)=>{
     else{
         req.flash("error","Access denied. Admins only.");
         res.redirect("/listings");
+    }
+}
+
+module.exports.isTripPlanOwner = async(req,res,next)=>{
+    const { id } = req.params;
+
+    const plan = await TripPlan.findById(id); //DB for that plan
+
+    if(!plan){
+        throw new ExpressError(404,"Trip plan not found");
+    }
+
+    if(!plan.user.equals(res.locals.currUser._id)){
+        req.flash("error","You don't have permission to access this trip plan.")
+        return res.redirect("/trip-planner/new");
+    }
+
+    next();
+}
+
+module.exports.validateTripPlan = (req,res,next)=>{
+    const {error} = tripPlanSchema.validate(req.body);
+    if(error){
+        const errMsg = error.details.map(el => el.message).join(", ");
+        throw new ExpressError(400,errMsg);
+    }else{
+        next();
     }
 }

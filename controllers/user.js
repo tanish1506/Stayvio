@@ -15,7 +15,7 @@ module.exports.signup = async (req,res) => {
             if(err){
                 return next(err)
             }
-            req.flash("sucess", "Welcome to Stayvio!!");
+            req.flash("success", "Welcome to Stayvio!!");
             res.redirect("/listings");
         })
         
@@ -32,7 +32,7 @@ module.exports.renderLoginForm = (req,res)=>{
 
 
 module.exports.login = async (req,res) => {
-     req.flash("sucess" ,"Welcome back to Stayvio!")
+     req.flash("success" ,"Welcome back to Stayvio!")
      let redirectUrl = res.locals.redirectUrl || "/listings";
      res.redirect(redirectUrl); 
 }
@@ -42,7 +42,7 @@ module.exports.logout = (req,res,next)=>{
         if(err){
             return next(err);
         }
-        req.flash("sucess","you are logged out!");
+        req.flash("success","you are logged out!");
         res.redirect("/listings");
     })
 }
@@ -92,7 +92,7 @@ module.exports.updateProfile = async (req,res) => {
         preferredDestinations : preferredDestinations ? preferredDestinations.split(",").map(d => d.trim()).filter(d => d) : [],
     });
     
-    req.flash('sucess',"Profile Updated!");
+    req.flash('success',"Profile Updated!");
     res.redirect("/profile");
 }
 

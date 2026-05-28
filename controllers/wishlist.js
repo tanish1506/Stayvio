@@ -30,7 +30,7 @@ module.exports.addToWishlist = async (req, res) => {
     user.wishlist.push(listingId);
     await user.save();
     
-    req.flash("sucess", "Added to wishlist!");
+    req.flash("success", "Added to wishlist!");
     res.redirect(req.get('referer') || '/listings');
 }
 
@@ -44,7 +44,7 @@ module.exports.removeFromWishlist = async (req, res) => {
         { $pull: { wishlist: listingId } }
     );
     
-    req.flash("sucess", "Removed from wishlist!");
+    req.flash("success", "Removed from wishlist!");
     res.redirect(req.get('referer') || '/wishlist');
 }
 

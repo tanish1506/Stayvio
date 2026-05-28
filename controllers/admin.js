@@ -62,6 +62,6 @@ module.exports.deleteUser = async(req,res) => {
     //delete their bookings
     await Booking.deleteMany({user : user._id});
     await User.findByIdAndDelete(req.params.id);
-    req.flash('sucess','User deleted Sucessfully');
+    req.flash('success','User deleted Successfully');
     res.redirect("/admin");
 };
