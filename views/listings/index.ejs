@@ -37,10 +37,17 @@
 
   <!-- Main Content -->
   <div class="container px-2 py-3">
+
+    <!-- Mobile filter toggle -->
+    <button class="filters-toggle-btn btn mb-3" onclick="toggleFilters()"
+      style="display:none; background: var(--color-white); border: 1.5px solid #e0d5c8; border-radius: 10px; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; color: var(--color-text);">
+      <i class="fa-solid fa-sliders me-2" style="color: var(--color-nav);"></i>Filters
+    </button>
+
     <div class="row g-4">
 
       <!-- LEFT: Filters Sidebar -->
-      <div class="col-lg-2 col-md-3">
+      <div class="col-lg-2 col-md-3 filters-sidebar-col" id="filtersSidebarCol">
         <div class="filters-sidebar">
           <form action="/listings" method="get" id="filtersForm">
             <div class="filters-header">
@@ -97,7 +104,7 @@
       </div>
 
       <!-- RIGHT: Listings Grid -->
-      <div class="col-lg-10 col-md-9">
+      <div class="col-lg-10 col-md-9 col-12">
 
         <!-- Results Header -->
         <div class="results-header">
@@ -583,4 +590,20 @@
       padding: 4rem 2rem;
       color: var(--color-muted);
     }
+
+    /* Mobile search overrides */
+    @media (max-width: 767.98px) {
+      .search-box { max-width: 100%; padding: 1rem; }
+      .search-form-row { flex-direction: column; gap: 0.8rem; }
+      .search-field { padding: 0; min-width: unset; }
+      .search-divider { display: none; }
+      .search-submit-btn { width: 100%; }
+    }
   </style>
+
+<script>
+  function toggleFilters() {
+    const col = document.getElementById('filtersSidebarCol');
+    col.classList.toggle('show');
+  }
+</script>

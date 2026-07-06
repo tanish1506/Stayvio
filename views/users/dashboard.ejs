@@ -7,22 +7,30 @@
     <div class="dash-header">
       <div>
         <h2 class="dash-title">
-          <% if(currUser.role === 'host' || currUser.role === 'both'){ %>
+          <% if(currUser.role === 'admin'){ %>
+            <i class="fa-solid fa-shield-halved me-2" style="color:var(--color-cta); font-size:1.2rem;"></i>Admin Overview
+          <% } else if(currUser.role === 'host' || currUser.role === 'both'){ %>
             Host Dashboard
           <% } else { %>
             My Dashboard
           <% } %>
         </h2>
 
-        <p class="dash-sub">Welcome back, <strong><%= currUser.username %></strong> — 
-          <% if(currUser.role === 'host' || currUser.role === 'both'){ %>
-            here's your property overview
+        <p class="dash-sub">
+          <% if(currUser.role === 'admin'){ %>
+            Platform-wide data — all listings, bookings & revenue
+          <% } else if(currUser.role === 'host' || currUser.role === 'both'){ %>
+            Welcome back, <strong><%= currUser.username %></strong> — here's your property overview
           <% } else { %>
-            here's your travel overview
+            Welcome back, <strong><%= currUser.username %></strong> — here's your travel overview
           <% } %>
         </p>
       </div>
-      <% if(currUser.role === 'host' || currUser.role === 'both'){ %>
+      <% if(currUser.role === 'admin'){ %>
+        <a href="/admin" class="btn-cta btn px-4">
+          <i class="fa-solid fa-shield-halved me-2"></i>Full Admin Panel
+        </a>
+      <% } else if(currUser.role === 'host' || currUser.role === 'both'){ %>
         <a href="/listings/new" class="btn-cta btn px-4">
           <i class="fa-solid fa-plus me-2"></i>Add New Listing
         </a>
@@ -30,7 +38,7 @@
     </div>
 
     <!-- Stats Cards -->
-     <% if(currUser.role === 'host' || currUser.role === 'both') { %>
+     <% if(currUser.role === 'host' || currUser.role === 'both' || currUser.role === 'admin') { %>
         <div class="dash-stats-grid">
           <div class="dash-stat-card">
             <div class="dash-stat-icon" style="background:#f0f4e8;">

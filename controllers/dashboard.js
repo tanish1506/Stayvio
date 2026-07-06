@@ -9,10 +9,10 @@ module.exports.getHostDashboard = async(req,res) => {
     // Trip plans - sabke liye
     const tripPlans = await TripPlan.find({user : req.user._id}).sort({createdAt: -1});
 
-    // My Booking - sabke liye(as a guest / travelers)
+    // My Bookings - as a guest/traveler (own bookings)
     const myBookings = await Booking.find({user : req.user._id}).populate('listing').sort({createdAt : -1});
 
-    // Host-only data
+    // Host-only / admin data
     let listings = [];
     let bookings = [];
     let totalEarnings = 0;
@@ -20,19 +20,29 @@ module.exports.getHostDashboard = async(req,res) => {
     let pendingApprovals = [];
     let allReviews = [];
 
-    if(role === 'host' || role === 'both' || role === 'admin'){
-        listings = await Listing.find({ owner : req.user._id }).populate({path : 'reviews' , populate : {path : 'author'}});
+    if(role === 'admin'){
+        // Admin sees ALL listings and ALL bookings on the platform
+        listings = await Listing.find({}).populate({path : 'reviews', populate : {path : 'author'}}).sort({createdAt: -1});
+
+        bookings = await Booking.find({}).populate('listing').populate('user').sort({createdAt : -1});
+
+        totalEarnings = bookings.filter(b => b.status === 'confirmed').reduce((sum,b) => sum + b.totalPrice, 0);
+        pendingBookings = bookings.filter(b => b.status === 'pending_payment').length;
+        pendingApprovals = bookings.filter(b => b.status === 'pending_approval');
+        allReviews = listings.flatMap(l => l.reviews.map(r => ({ ...r._doc, listingTitle: l.title })));
+
+    } else if(role === 'host' || role === 'both'){
+        // Host sees only their own listings and related bookings
+        listings = await Listing.find({ owner : req.user._id }).populate({path : 'reviews', populate : {path : 'author'}});
 
         const listingIds = listings.map(l => l._id);
 
-        bookings = await Booking.find({listing : {$in : listingIds }}).populate('listing').populate('user').sort({createdAt : -1});
+        bookings = await Booking.find({listing : {$in : listingIds}}).populate('listing').populate('user').sort({createdAt : -1});
 
-        totalEarnings = bookings.filter(b => b.status === 'confirmed').reduce((sum,b) => sum + b.totalPrice , 0);
-
+        totalEarnings = bookings.filter(b => b.status === 'confirmed').reduce((sum,b) => sum + b.totalPrice, 0);
         pendingBookings = bookings.filter(b => b.status === 'pending_payment').length;
         pendingApprovals = bookings.filter(b => b.status === 'pending_approval');
-        allReviews = listings.flatMap(l => l.reviews.map(r => ({ ...r._doc, listingTitle : l.title}))
-    );
+        allReviews = listings.flatMap(l => l.reviews.map(r => ({ ...r._doc, listingTitle: l.title })));
     }
 
     res.render('users/dashboard',{
@@ -45,6 +55,5 @@ module.exports.getHostDashboard = async(req,res) => {
         allReviews,
         tripPlans,
         searchQuery : ''
-    })
-
+    });
 }

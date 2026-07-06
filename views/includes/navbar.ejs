@@ -1,9 +1,19 @@
 <nav class="navbar navbar-expand-md sticky-top">
   <div class="container px-2">
     <a class="navbar-brand me-4" href="/listings">
-      <img src="/images/logo-white.png" alt="Stayvio" style="height:50px; width:auto;">
+      <img src="/images/logo-white.png" alt="Stayvio" style="height:40px; width:auto;">
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <div class="d-flex align-items-center gap-2 d-md-none ms-auto">
+      <% if(currUser){ %>
+        <a href="/wishlist" class="nav-wishlist-btn" title="Wishlist">
+          <i class="fa-regular fa-heart"></i>
+        </a>
+      <% } %>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+    <button class="navbar-toggler d-none d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
@@ -16,18 +26,16 @@
           </a>
         <% } %>
       </div>
-      <div class="d-flex align-items-center gap-2">
+      <div class="d-flex align-items-center gap-2 flex-wrap navbar-right-group">
         <% if(currUser){ %>
-          <% if(currUser.role === 'host' || currUser.role === 'both'){ %>
-            <a href="/listings/new" class="btn-list-space">List Your Space</a>
-          <% } else { %>
-            <a href="/listings/new" class="btn-list-space">List Your Space</a>
-          <% } %>
-          <!-- Wishlist icon -->
-          <a href="/wishlist" class="nav-wishlist-btn" title="Wishlist">
+          <a href="/listings/new" class="btn-list-space">List Your Space</a>
+          <!-- Wishlist icon — hidden on mobile (shown above toggler) -->
+          <a href="/wishlist" class="nav-wishlist-btn d-none d-md-flex" title="Wishlist">
             <i class="fa-regular fa-heart"></i>
           </a>
-          <div class="nav-profile-dropdown">
+
+          <!-- Desktop: dropdown profile button -->
+          <div class="nav-profile-dropdown d-none d-md-block">
             <button class="nav-profile-btn" onclick="toggleProfileDropdown()">
               <div class="nav-avatar"><%= currUser.username.charAt(0).toUpperCase() %></div>
               <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
@@ -42,7 +50,6 @@
               <a href="/dashboard" class="nav-profile-menu-item">
                 <i class="fa-solid fa-chart-line"></i>Dashboard
               </a>
-              
               <% if(currUser.role === 'admin'){ %>
                 <a href="/admin" class="nav-profile-menu-item">
                   <i class="fa-solid fa-shield-halved"></i>Admin Panel
@@ -54,11 +61,49 @@
               </a>
             </div>
           </div>
+
+          <!-- Mobile: premium user panel -->
+          <div class="d-md-none mobile-user-panel w-100">
+            <!-- User Card -->
+            <div class="mup-card">
+              <div class="mup-avatar"><%= currUser.username.charAt(0).toUpperCase() %></div>
+              <div class="mup-info">
+                <div class="mup-name">@<%= currUser.username %></div>
+                <span class="mup-role-badge mup-role-<%= currUser.role %>"><%= currUser.role %></span>
+              </div>
+              <a href="/profile" class="mup-edit-btn">
+                <i class="fa-solid fa-pen"></i>
+              </a>
+            </div>
+            <!-- Quick Links Grid -->
+            <div class="mup-grid">
+              <a href="/bookings" class="mup-tile">
+                <div class="mup-tile-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                <span>Bookings</span>
+              </a>
+              <a href="/dashboard" class="mup-tile">
+                <div class="mup-tile-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <span>Dashboard</span>
+              </a>
+              <a href="/wishlist" class="mup-tile">
+                <div class="mup-tile-icon"><i class="fa-regular fa-heart"></i></div>
+                <span>Wishlist</span>
+              </a>
+              <a href="/trip-planner/new" class="mup-tile">
+                <div class="mup-tile-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <span>Trip AI</span>
+              </a>
+            </div>
+            <!-- Logout -->
+            <a href="/logout" class="mup-logout">
+              <i class="fa-solid fa-right-from-bracket me-2"></i>Log out
+            </a>
+          </div>
+
         <% } else { %>
           <button onclick="openAuthModal('login')" class="btn-list-space" style="border: none; cursor: pointer;">List Your Space</button>
           <button onclick="openAuthModal('login')" class="btn-nav-login">Login / Sign Up</button>
         <% } %>
-
       </div>
     </div>
   </div>

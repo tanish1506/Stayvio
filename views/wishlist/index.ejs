@@ -202,6 +202,15 @@
 
 /* Sidebar */
 .wishlist-sidebar { width: 260px; min-width: 260px; position: sticky; top: 90px; }
+
+@media (max-width: 991.98px) {
+  .wishlist-layout { flex-wrap: wrap; }
+  .wishlist-sidebar { width: 100%; min-width: unset; position: static; }
+  .wishlist-grid-wrap { min-width: 0; }
+}
+@media (max-width: 576px) {
+  .wishlist-header { flex-direction: column; align-items: flex-start; }
+}
 .wishlist-sidebar-card {
   background: var(--color-white);
   border-radius: var(--radius);

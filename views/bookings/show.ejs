@@ -233,4 +233,14 @@
 .bshow-rules-list li { padding: 0.3rem 0; border-bottom: 1px solid #f8f3ed; }
 .bshow-rules-list li::before { content: "— "; color: var(--color-nav); }
 .bshow-rules-list li:last-child { border-bottom: none; }
+
+@media (max-width: 767.98px) {
+  .bshow-listing-header { flex-direction: column; }
+  .bshow-listing-img { width: 100%; height: 160px; }
+  .bshow-listing-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+  .bshow-btn-pay, .bshow-btn-secondary { flex: 1; text-align: center; }
+  .bshow-summary-row { flex-direction: column; gap: 0.8rem; }
+  .bshow-host-actions { flex-direction: column; }
+  .bshow-host-btn { width: 100%; }
+}
 </style>

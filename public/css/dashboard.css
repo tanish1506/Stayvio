@@ -132,7 +132,7 @@
 @media (max-width: 768px) {
   .dash-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .dash-layout { flex-direction: column; }
-  .dash-sidebar { width: 100%; position: static; }
+  .dash-sidebar { width: 100% !important; min-width: unset !important; position: static; }
 }
 .dash-approval-row {
   display: flex;
